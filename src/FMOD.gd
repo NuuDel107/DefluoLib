@@ -17,7 +17,6 @@ func unload_bank(bank: Bank):
 
 func play_one_shot(event: EventAsset):
 	FMODRuntime.play_one_shot(event)
-	FMODRuntime.studio_system
 
 func play_one_shot_attached(event: EventAsset, node: Node3D):
 	FMODRuntime.play_one_shot(event, node)
