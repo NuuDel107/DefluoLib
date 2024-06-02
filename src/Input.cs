@@ -302,7 +302,6 @@ public partial class Input : Node
 
             // Parse DigitalInput from input event
             var input = DigitalInput.FromEvent(@event);
-            GD.Print(input.DisplayString);
             // Invoke input event if input could be parsed
             if (DigitalInputPressed != null && input != null)
                 DigitalInputPressed.Invoke(input);
