@@ -1,4 +1,5 @@
 using Godot;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -155,6 +156,18 @@ public class FMODEventInstance : FMODInstance
     }
 
     /// <summary>
+    /// Plays instance once with specified parameters and releases it afterwards
+    /// </summary>
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void PlayOneShot(params (string Name, Variant Value)[] parameters)
+    {
+        foreach (var parameter in parameters)
+            SetParameter(parameter);
+
+        PlayOneShot();
+    }
+
+    /// <summary>
     /// Sets the value of a number parameter
     /// </summary>
     /// <param name="paramName">Name of the parameter</param>
@@ -169,6 +182,18 @@ public class FMODEventInstance : FMODInstance
     /// <param name="value">Value to set parameter to</param>
     public void SetParameter(string paramName, string value) =>
         Call("set_instance_label_parameter", Instance, paramName, value);
+
+    /// <summary>
+    /// Sets the value of a parameter
+    /// </summary>
+    /// <param name="parameter">Tuple containing the name of the parameter and value to set parameter to</param>
+    public void SetParameter((string Name, Variant Value) parameter)
+    {
+        if (parameter.Value.VariantType == Variant.Type.String)
+            Call("set_instance_label_parameter", Instance, parameter.Name, parameter.Value);
+        else
+            Call("set_instance_float_parameter", Instance, parameter.Name, parameter.Value);
+    }
 
     /// <summary>
     /// Starts playback of the event
@@ -266,29 +291,33 @@ public partial class FMODHandler : Node
     /// Plays event once and releases the event instance afterwards
     /// </summary>
     /// <param name="eventPath">Name of the event</param>
-    public void PlayEvent(string eventPath) => CreateEventInstance(eventPath).PlayOneShot();
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void PlayEvent(string eventPath, params (string Name, Variant Value)[] parameters) => CreateEventInstance(eventPath).PlayOneShot(parameters);
 
     /// <summary>
     /// Plays event once and releases the event instance afterwards
     /// </summary>
     /// <param name="eventAsset">Event asset that the played instance will be created from</param>
-    public void PlayEvent(FMODEvent eventAsset) => PlayEvent(eventAsset.Path);
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void PlayEvent(FMODEvent eventAsset, params (string Name, Variant Value)[] parameters) => PlayEvent(eventAsset.Path, parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
     /// </summary>
     /// <param name="eventPath">Name of the event</param>
     /// <param name="attachedNode">3D node that is attached to the event</param>
-    public void PlayEvent(string eventPath, Node3D attachedNode) =>
-        CreateEventInstance(eventPath, attachedNode).PlayOneShot();
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void PlayEvent(string eventPath, Node3D attachedNode, params (string Name, Variant Value)[] parameters) =>
+        CreateEventInstance(eventPath, attachedNode).PlayOneShot(parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
     /// </summary>
     /// <param name="eventAsset">Event asset that the played instance will be created from</param>
     /// <param name="attachedNode">3D node that is attached to the event</param>
-    public void PlayEvent(FMODEvent eventAsset, Node3D attachedNode) =>
-        PlayEvent(eventAsset.Path, attachedNode);
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void PlayEvent(FMODEvent eventAsset, Node3D attachedNode, params (string Name, Variant Value)[] parameters) =>
+        PlayEvent(eventAsset.Path, attachedNode, parameters);
 
     /// <summary>
     /// Sets the value of a number parameter in global scope
@@ -305,6 +334,19 @@ public partial class FMODHandler : Node
     /// <param name="value">Value to set parameter to</param>
     public void SetGlobalParameter(string paramName, string value) =>
         GDScriptNode.Call("set_global_label_parameter", paramName, value);
+
+    /// <summary>
+    /// Sets the value of a parameter in global scope
+    /// </summary>
+    /// <param name="parameter">Tuple containing the name of the parameter and value to set parameter to</param>
+    public void SetGlobalParameter((string Name, Variant Value) parameter)
+    {
+        if (parameter.Value.VariantType == Variant.Type.String)
+            GDScriptNode.Call("set_global_label_parameter", parameter.Name, parameter.Value);
+        else
+            GDScriptNode.Call("set_global_float_parameter", parameter.Name, parameter.Value);
+    }
+
 
     /// <summary>
     /// Stops all created event instances and releases them

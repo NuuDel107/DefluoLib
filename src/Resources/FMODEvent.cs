@@ -48,13 +48,15 @@ public partial class FMODEvent : FMODAsset
     /// <summary>
     /// Plays event once and releases the event instance afterwards
     /// </summary>
-    public void Play() => Defluo.FMOD.PlayEvent(this);
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void Play(params (string Name, Variant Value)[] parameters) => Defluo.FMOD.PlayEvent(this, parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
     /// </summary>
     /// <param name="attachedNode">3D node that is attached to the event</param>
-    public void Play(Node3D attachedNode) => Defluo.FMOD.PlayEvent(this, attachedNode);
+    /// <param name="parameters">Event parameters that will be set before playing event instance</param>
+    public void Play(Node3D attachedNode, params (string Name, Variant Value)[] parameters) => Defluo.FMOD.PlayEvent(this, attachedNode, parameters);
 
     /// <summary>
     /// Creates a new event instance
