@@ -255,7 +255,8 @@ public partial class Input : Node
                 {
                     if (
                         @event is InputEventKey keyEvent
-                        && bindedInput.Equals(keyEvent.PhysicalKeycode)
+                        // If physical keycode is empty, check for equality using the regular keycode instead
+                        && bindedInput.Equals(keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode)
                     )
                     {
                         HandleDigitalPress(keybind, keyEvent.Pressed);
