@@ -54,6 +54,7 @@ public partial class Defluo : Node
 
     public override void _Ready()
     {
+        ProcessMode = ProcessModeEnum.Always;
         Print("Initialization complete");
     }
 
