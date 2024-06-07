@@ -16,8 +16,18 @@ public partial class FMODBank : FMODAsset
         set { Asset = value; }
     }
 
-    public FMODBankInstance Bank;
-
+    private FMODBankInstance _bank;
+    public FMODBankInstance Bank
+    {
+        get
+        {
+            if (_bank == null && Defluo.FMOD.IsNodeReady())
+            {
+                _bank = Defluo.FMOD.GetBank(this);
+            }
+            return _bank;
+        }
+    }
     /// <summary>
     /// File path of the bank within the project file structure
     /// </summary>
@@ -32,14 +42,6 @@ public partial class FMODBank : FMODAsset
     public long ModifiedTime
     {
         get { return (long)BankAsset.Get("modified_time"); }
-    }
-
-    public FMODBank()
-    {
-        if (Engine.IsEditorHint())
-            return;
-
-        Defluo.Singleton.Ready += () => Bank = Defluo.FMOD.GetBank(this);
     }
 
     public override Array<Dictionary> _GetPropertyList()

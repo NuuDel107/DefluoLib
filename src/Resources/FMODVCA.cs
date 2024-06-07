@@ -16,14 +16,17 @@ public partial class FMODVCA : FMODAsset
         set { Asset = value; }
     }
 
-    public FMODVCAInstance VCA;
-
-    public FMODVCA()
+    private FMODVCAInstance _VCA;
+    public FMODVCAInstance VCA
     {
-        if (Engine.IsEditorHint())
-            return;
-
-        Defluo.Singleton.Ready += () => VCA = Defluo.FMOD.GetVCA(this);
+        get
+        {
+            if (_VCA == null && Defluo.FMOD.IsNodeReady())
+            {
+                _VCA = Defluo.FMOD.GetVCA(this);
+            }
+            return _VCA;
+        }
     }
 
     public override Array<Dictionary> _GetPropertyList()

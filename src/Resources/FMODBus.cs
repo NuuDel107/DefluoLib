@@ -16,14 +16,17 @@ public partial class FMODBus : FMODAsset
         set { Asset = value; }
     }
 
-    public FMODBusInstance Bus;
-
-    public FMODBus()
+    private FMODBusInstance _bus;
+    public FMODBusInstance Bus
     {
-        if (Engine.IsEditorHint())
-            return;
-
-        Defluo.Singleton.Ready += () => Bus = Defluo.FMOD.GetBus(this);
+        get
+        {
+            if (_bus == null && Defluo.FMOD.IsNodeReady())
+            {
+                _bus = Defluo.FMOD.GetBus(this);
+            }
+            return _bus;
+        }
     }
 
     public override Array<Dictionary> _GetPropertyList()
