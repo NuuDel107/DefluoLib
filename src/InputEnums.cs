@@ -176,6 +176,51 @@ public class DigitalInput
     public bool Equals(JoyAxis joyAxis) =>
         Type == DigitalInputType.JoyAxis && (JoyAxis)EnumValue == joyAxis;
 
+    public bool Equals(JoyAxis joyAxis, bool positiveAnalog) =>
+        Type == DigitalInputType.JoyAxis && (JoyAxis)EnumValue == joyAxis && positiveAnalog == PositiveAnalog;
+
+    /// <summary>
+    /// Parses the pressed state from event, if event applies to digital input
+    /// </summary>
+    /// <returns>Pressed state of digital input in event, or null if event doesn't apply</returns>
+    public bool? ParseValue(InputEvent @event, float axisThreshold = Keybind.DefaultAxisThreshold)
+    {
+        if (
+          @event is InputEventKey keyEvent
+          // If physical keycode is empty, check for equality using the regular keycode instead
+          && Equals(keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode)
+        )
+            return keyEvent.Pressed;
+
+        else if (
+            @event is InputEventMouseButton mouseButtonEvent
+            && Equals(mouseButtonEvent.ButtonIndex)
+        )
+            return mouseButtonEvent.Pressed;
+
+        else if (
+            @event is InputEventJoypadButton joypadEvent
+            && Equals(joypadEvent.ButtonIndex)
+        )
+            return joypadEvent.Pressed;
+
+        else if (
+            @event is InputEventJoypadMotion joypadMotionEvent
+            && Equals(joypadMotionEvent.Axis, joypadMotionEvent.AxisValue > 0)
+        )
+        {
+            if (Mathf.Abs(joypadMotionEvent.AxisValue) >= axisThreshold)
+                return true;
+            else if (Mathf.Abs(joypadMotionEvent.AxisValue) < axisThreshold)
+                return false;
+            else
+                return null;
+        }
+
+        else
+            return null;
+    }
+
     /// <summary>
     /// Returns a <c>DigitalInput</c> class based on the button that caused the event.
     /// Returns <c>null</c> if class couldn't be parsed from the event
@@ -308,42 +353,42 @@ public static class ControllerDigitalInput
     /// <summary>
     /// Left joystick moved up
     /// </summary>
-    public static readonly DigitalInput LeftStickUp = new(JoyAxis.LeftY, true);
+    public static readonly DigitalInput LeftStickUp = new(JoyAxis.LeftY, false);
 
     /// <summary>
     /// Left joystick moved down
     /// </summary>
-    public static readonly DigitalInput LeftStickDown = new(JoyAxis.LeftY, false);
+    public static readonly DigitalInput LeftStickDown = new(JoyAxis.LeftY, true);
 
     /// <summary>
     /// Left joystick moved left
     /// </summary>
-    public static readonly DigitalInput LeftStickLeft = new(JoyAxis.LeftX, true);
+    public static readonly DigitalInput LeftStickLeft = new(JoyAxis.LeftX, false);
 
     /// <summary>
     /// Left joystick moved right
     /// </summary>
-    public static readonly DigitalInput LeftStickRight = new(JoyAxis.LeftX, false);
+    public static readonly DigitalInput LeftStickRight = new(JoyAxis.LeftX, true);
 
     /// <summary>
     /// Right joystick moved up
     /// </summary>
-    public static readonly DigitalInput RightStickUp = new(JoyAxis.RightY, true);
+    public static readonly DigitalInput RightStickUp = new(JoyAxis.RightY, false);
 
     /// <summary>
     /// Right joystick moved down
     /// </summary>
-    public static readonly DigitalInput RightStickDown = new(JoyAxis.RightY, false);
+    public static readonly DigitalInput RightStickDown = new(JoyAxis.RightY, true);
 
     /// <summary>
     /// Right joystick moved left
     /// </summary>
-    public static readonly DigitalInput RightStickLeft = new(JoyAxis.RightX, true);
+    public static readonly DigitalInput RightStickLeft = new(JoyAxis.RightX, false);
 
     /// <summary>
     /// Right joystick moved right
     /// </summary>
-    public static readonly DigitalInput RightStickRight = new(JoyAxis.RightX, false);
+    public static readonly DigitalInput RightStickRight = new(JoyAxis.RightX, true);
 
     /// <summary>
     /// Left shoulder button (Xbox: LB, PS: L1)

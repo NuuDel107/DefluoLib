@@ -208,23 +208,38 @@ public partial class Input : Node
     }
 
     /// <summary>
-    /// Event that is invoked when a digital input is pressed
+    /// Event that is invoked when a digital input is pressed.
+    /// Action parameters: input that was pressed, pressed state of input (<c>true</c> = pressed)
     /// </summary>
-    public event Action<DigitalInput> DigitalInputPressed;
+    public event Action<DigitalInput, bool> DigitalInputPressed;
 
     /// <summary>
     /// Waits for a digital input to be pressed, and returns it
     /// </summary>
-    /// <returns></returns>
-    public Task<DigitalInput> AwaitForDigitalInput()
+    /// <param name="pressed">
+    /// Whether or not digital input should be pressed down.
+    /// If unspecified, will return input regardless of its pressed state.
+    /// </param>
+    public Task<DigitalInput> AwaitForDigitalInput(bool? pressed = null)
     {
         var result = new TaskCompletionSource<DigitalInput>();
-        void eventHandler(DigitalInput input)
+        void eventHandler(DigitalInput input, bool inputPressed)
         {
-            result.SetResult(input);
-            DigitalInputPressed -= eventHandler;
-        }
+            if (pressed.HasValue)
+            {
+                if (inputPressed == pressed)
+                {
+                    result.SetResult(input);
+                    DigitalInputPressed -= eventHandler;
+                }
+            }
+            else
+            {
+                result.SetResult(input);
+                DigitalInputPressed -= eventHandler;
+            }
 
+        }
         DigitalInputPressed += eventHandler;
         return result.Task;
     }
@@ -252,43 +267,13 @@ public partial class Input : Node
                 // See if event key has been binded to an action
                 foreach (var bindedInput in keybind.BindedInputs)
                 {
-                    if (
-                        @event is InputEventKey keyEvent
-                        // If physical keycode is empty, check for equality using the regular keycode instead
-                        && bindedInput.Equals(keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode)
-                    )
+                    var pressed = bindedInput.ParseValue(@event);
+                    if (pressed.HasValue)
                     {
-                        HandleDigitalPress(keybind, keyEvent.Pressed);
+                        ActivateKeybind(keybind, pressed.Value);
                         break;
                     }
-                    else if (
-                        @event is InputEventMouseButton mouseButtonEvent
-                        && bindedInput.Equals(mouseButtonEvent.ButtonIndex)
-                    )
-                    {
-                        HandleDigitalPress(keybind, mouseButtonEvent.Pressed);
-                        break;
-                    }
-                    else if (
-                        @event is InputEventJoypadButton joypadEvent
-                        && bindedInput.Equals(joypadEvent.ButtonIndex)
-                    )
-                    {
-                        HandleDigitalPress(keybind, joypadEvent.Pressed);
-                        break;
-                    }
-                    else if (
-                        @event is InputEventJoypadMotion joypadMotionEvent
-                        && bindedInput.Equals(joypadMotionEvent.Axis)
-                    )
-                    {
-                        HandleAnalogPress(
-                            keybind,
-                            joypadMotionEvent.AxisValue,
-                            keybind.Options.AxisThreshold
-                        );
-                        break;
-                    }
+
                 }
             }
 
@@ -303,10 +288,30 @@ public partial class Input : Node
             // Parse DigitalInput from input event
             var input = DigitalInput.FromEvent(@event);
             // Invoke input event if input could be parsed
+            // ParseValue should always return a boolean since the event applies to input
             if (DigitalInputPressed != null && input != null)
-                DigitalInputPressed.Invoke(input);
+                DigitalInputPressed.Invoke(input, input.ParseValue(@event).Value);
         }
     }
+
+    public override void _Process(double delta)
+    {
+        // Update just pressed and just released variables of registered keybinds
+        foreach (var keybind in keybinds)
+        {
+            if (keybind.IsPressed)
+            {
+                keybind.IsJustPressed = keybind.FramesHeldDown == 0;
+                keybind.FramesHeldDown++;
+            }
+            else
+            {
+                keybind.IsJustReleased = keybind.FramesHeldDown != 0;
+                keybind.FramesHeldDown = 0;
+            }
+        }
+    }
+
 
     public override void _Notification(int what)
     {
@@ -389,20 +394,20 @@ public partial class Input : Node
         return new Vector2(GetAnalogValue(x), GetAnalogValue(y)).Normalized();
     }
 
-    private void HandleDigitalPress(Keybind keybind, bool isPressed)
+    private void ActivateKeybind(Keybind keybind, bool isPressed)
     {
-        if (EventLogging)
-            GD.Print($"{keybind.DisplayName} {(isPressed ? "pressed" : "released")}");
-
         if (isPressed && !keybind.IsPressed)
+        {
+            if (EventLogging)
+                GD.Print($"{keybind.DisplayName} pressed");
             keybind.Activate(true);
+        }
         else if (!isPressed && keybind.IsPressed)
+        {
+            if (EventLogging)
+                GD.Print($"{keybind.DisplayName} released");
             keybind.Activate(false);
-    }
-
-    private void HandleAnalogPress(Keybind keyBind, float value, float threshold)
-    {
-        HandleDigitalPress(keyBind, value > threshold);
+        }
     }
 
     /// <summary>

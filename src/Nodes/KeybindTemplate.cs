@@ -24,7 +24,7 @@ internal partial class KeybindTemplate : HBoxContainer
 
     private Keybind Keybind;
 
-    public List<TextureButton> Buttons = new();
+    public List<Button> Buttons = new();
 
     public void Initialize(Keybind keybind)
     {
@@ -35,16 +35,16 @@ internal partial class KeybindTemplate : HBoxContainer
         Buttons = new();
         if (!Button1.IsEmpty)
         {
-            Buttons.Add(GetNode<TextureButton>(Button1));
+            Buttons.Add(GetNode<Button>(Button1));
             if (!Button2.IsEmpty)
             {
-                Buttons.Add(GetNode<TextureButton>(Button2));
+                Buttons.Add(GetNode<Button>(Button2));
                 if (!Button3.IsEmpty)
                 {
-                    Buttons.Add(GetNode<TextureButton>(Button3));
+                    Buttons.Add(GetNode<Button>(Button3));
                     if (!Button4.IsEmpty)
                     {
-                        Buttons.Add(GetNode<TextureButton>(Button4));
+                        Buttons.Add(GetNode<Button>(Button4));
                     }
                 }
             }
@@ -53,17 +53,22 @@ internal partial class KeybindTemplate : HBoxContainer
         foreach (var (button, index) in Buttons.WithIndex())
         {
             if (keybind.BindedInputs.Count > index)
-                button.TextureNormal = Input.GetInputTexture(keybind.BindedInputs[index]);
+                button.Icon = Input.GetInputTexture(keybind.BindedInputs[index]);
             else
-                button.TextureNormal = null;
+                button.Icon = null;
 
             button.Pressed += async () =>
             {
-                button.TextureNormal = null;
-                var input = await Defluo.Input.AwaitForDigitalInput();
-                GD.Print(input.DisplayString);
+                button.Icon = null;
+                button.FocusMode = FocusModeEnum.None;
+                // Await for UI input to release
+                await Defluo.Input.AwaitForDigitalInput(pressed: false);
+                // Save next digital input as keybind
+                var input = await Defluo.Input.AwaitForDigitalInput(pressed: false);
+                button.FocusMode = FocusModeEnum.All;
+                button.GrabFocus();
                 Keybind.BindedInputs[index] = input;
-                button.TextureNormal = Input.GetInputTexture(input);
+                button.Icon = Input.GetInputTexture(input);
             };
         }
     }

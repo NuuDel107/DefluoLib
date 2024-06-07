@@ -18,26 +18,42 @@ public class Keybind
     /// <summary>
     /// Name of keybind, displayed in the settings menu
     /// </summary>
-    public string DisplayName;
+    public string DisplayName { get; internal set; }
 
     /// <summary>
     /// Category of keybind. Empty string if not defined.
     /// Categories can be defined by adding a <c>CreateCategory</c> attribute to keybind definition
     /// </summary>
-    public string Category = "";
+    public string Category { get; internal set; } = "";
 
     /// <summary>
     /// If keybind is currently pressed down
     /// </summary>
-    public bool IsPressed = false;
+    public bool IsPressed { get; internal set; } = false;
+
+    /// <summary>
+    /// Amount of process frames that keybind has been held down
+    /// </summary>
+    public int FramesHeldDown { get; internal set; } = 0;
+
+    /// <summary>
+    /// If keybind has been pressed down this frame
+    /// </summary>
+    public bool IsJustPressed { get; internal set; } = false;
+
+    /// <summary>
+    /// If keybind has been released this frame
+    /// </summary>
+    public bool IsJustReleased { get; internal set; } = false;
+
 
     /// <summary>
     /// List of inputs binded to this action,
     /// represented as input enums
     /// </summary>
-    public List<DigitalInput> BindedInputs;
+    public List<DigitalInput> BindedInputs { get; internal set; }
 
-    public KeybindOptions Options;
+    public KeybindOptions Options { get; internal set; }
 
     private List<Action> onPressedActions = new();
     private List<Action> onReleasedActions = new();
