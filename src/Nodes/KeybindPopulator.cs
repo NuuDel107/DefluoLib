@@ -22,16 +22,20 @@ internal partial class KeybindPopulator : Control
         var latestCategory = "";
         foreach (var keybind in Defluo.Input.GetKeybinds())
         {
-            if (Divider != null)
+            // Don't display non-rebindable keybinds
+            if (!keybind.Options.CanBeRebinded)
+                continue;
+
+            // Create dividers between keybinds if template exists
+            if (Divider != null && keybind.Category != latestCategory)
             {
-                if (keybind.Category != latestCategory)
-                {
-                    latestCategory = keybind.Category;
-                    var divider = (CategoryDivider)Divider.Duplicate();
-                    divider.Initialize(latestCategory);
-                    Container.AddChild(divider);
-                }
+                latestCategory = keybind.Category;
+                var divider = (CategoryDivider)Divider.Duplicate();
+                divider.Initialize(latestCategory);
+                Container.AddChild(divider);
             }
+
+            // Initialize new template
             var template = (KeybindTemplate)Template.Duplicate();
             template.Name = keybind.DisplayName;
             Container.AddChild(template);

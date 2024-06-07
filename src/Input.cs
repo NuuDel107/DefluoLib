@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -130,7 +129,7 @@ public partial class Input : Node
                 foreach (var keybind in keybinds)
                 {
                     // Don't reset essential keybinds
-                    if (!keybind.IsEssential)
+                    if (!keybind.Options.IsEssential)
                         keybind.IsPressed = false;
                 }
             }
@@ -247,7 +246,7 @@ public partial class Input : Node
             foreach (var keybind in keybinds)
             {
                 // If input is disabled, only run actions for essential keybinds
-                if (Disabled && !keybind.IsEssential)
+                if (Disabled && !keybind.Options.IsEssential)
                     continue;
 
                 // See if event key has been binded to an action
@@ -286,7 +285,7 @@ public partial class Input : Node
                         HandleAnalogPress(
                             keybind,
                             joypadMotionEvent.AxisValue,
-                            keybind.AxisThreshold
+                            keybind.Options.AxisThreshold
                         );
                         break;
                     }
@@ -416,10 +415,12 @@ public partial class Input : Node
         // Loop through keybinds and create a dictionary entry for each of them
         foreach (var keybind in GetKeybinds())
         {
-            newResource.Dictionary.Add(
-                keybind.DisplayName,
-                new Godot.Collections.Array(keybind.BindedInputs.Select(input => (Variant)input))
-            );
+            // Don't create entries for non-rebindable keybinds
+            if (keybind.Options.CanBeRebinded)
+                newResource.Dictionary.Add(
+                    keybind.DisplayName,
+                    new Godot.Collections.Array(keybind.BindedInputs.Select(input => (Variant)input))
+                );
         }
         return newResource;
     }

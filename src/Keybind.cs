@@ -22,15 +22,9 @@ public class Keybind
 
     /// <summary>
     /// Category of keybind. Empty string if not defined.
-    /// Categories can be defined by adding a <see cref="">CreateCategory</see> attribute to keybind definition
+    /// Categories can be defined by adding a <c>CreateCategory</c> attribute to keybind definition
     /// </summary>
     public string Category = "";
-
-    /// <summary>
-    /// Threshold for when an analog input is determined to in the pressed state.
-    /// Used only if axis inputs have been binded to this keybind
-    /// </summary>
-    public float AxisThreshold;
 
     /// <summary>
     /// If keybind is currently pressed down
@@ -38,15 +32,12 @@ public class Keybind
     public bool IsPressed = false;
 
     /// <summary>
-    /// Essential keybinds will remain functional even when disabling input processing
-    /// </summary>
-    public bool IsEssential = false;
-
-    /// <summary>
     /// List of inputs binded to this action,
     /// represented as input enums
     /// </summary>
     public List<DigitalInput> BindedInputs;
+
+    public KeybindOptions Options;
 
     private List<Action> onPressedActions = new();
     private List<Action> onReleasedActions = new();
@@ -88,24 +79,52 @@ public class Keybind
 
     public Keybind(
         string displayName,
-        bool isEssential,
-        float axisThreshold,
+        KeybindOptions options,
         params DigitalInput[] inputs
     )
     {
         DisplayName = displayName;
-        IsEssential = isEssential;
-        AxisThreshold = axisThreshold;
-
+        Options = options;
         BindedInputs = inputs.ToList();
     }
-
     public Keybind(string displayName, params DigitalInput[] inputs)
-        : this(displayName, false, DefaultAxisThreshold, inputs) { }
+        : this(displayName, new(), inputs) { }
+}
 
-    public Keybind(string displayName, bool isEssential, params DigitalInput[] inputs)
-        : this(displayName, isEssential, DefaultAxisThreshold, inputs) { }
+/// <summary>
+/// Class containing possible options for keybinds
+/// </summary>
+public class KeybindOptions
+{
+    /// <summary>
+    /// Threshold for when an analog input is determined to in the pressed state.
+    /// Used only if axis inputs have been binded to this keybind
+    /// </summary>
+    public float AxisThreshold;
 
-    public Keybind(string displayName, float axisThreshold, params DigitalInput[] inputs)
-        : this(displayName, false, axisThreshold, inputs) { }
+    /// <summary>
+    /// Essential keybinds will remain functional even when disabling input processing
+    /// </summary>
+    public bool IsEssential;
+
+    /// <summary>
+    /// If keybind can be rebinded from the in-game keybinds menu
+    /// </summary>
+    public bool CanBeRebinded;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="isEssential">Essential keybinds will remain functional even when disabling input processing</param>
+    /// <param name="canBeRebinded">If keybind can be rebinded from the in-game keybinds menu</param>
+    /// <param name="axisThreshold">
+    /// Threshold for when an analog input is determined to in the pressed state.
+    /// Used only if axis inputs have been binded to this keybind
+    /// </param>
+    public KeybindOptions(bool isEssential = false, bool canBeRebinded = true, float axisThreshold = Keybind.DefaultAxisThreshold)
+    {
+        AxisThreshold = axisThreshold;
+        IsEssential = isEssential;
+        CanBeRebinded = canBeRebinded;
+    }
 }
