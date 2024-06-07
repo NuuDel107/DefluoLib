@@ -1,6 +1,6 @@
 # Credits
 
--   Included input icons created by [Nicolae (Xelu) Berbece](https://thoseawesomeguys.com/prompts/)
+-   Included input icons created by [Kenney](https://kenney.nl/assets/input-prompts)
 
 # TO-DO
 

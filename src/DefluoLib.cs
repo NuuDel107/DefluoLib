@@ -12,25 +12,25 @@ internal partial class DefluoLib : EditorPlugin
         AddAutoloadSingleton("Defluo", "res://addons/DefluoLib/src/Defluo.cs");
         AddProjectSetting(
             "DefluoLib/Input/KeyboardIconFolder",
-            "res://addons/DefluoLib/img/input/KeyboardDark",
+            "res://addons/DefluoLib/img/kenney_input/Keyboard",
             Variant.Type.String,
             PropertyHint.Dir
         );
         AddProjectSetting(
             "DefluoLib/Input/MouseIconFolder",
-            "res://addons/DefluoLib/img/input/MouseDark",
+            "res://addons/DefluoLib/img/kenney_input/Mouse",
             Variant.Type.String,
             PropertyHint.Dir
         );
         AddProjectSetting(
             "DefluoLib/Input/XboxIconFolder",
-            "res://addons/DefluoLib/img/input/Xbox",
+            "res://addons/DefluoLib/img/kenney_input/Xbox",
             Variant.Type.String,
             PropertyHint.Dir
         );
         AddProjectSetting(
             "DefluoLib/Input/PlayStationIconFolder",
-            "res://addons/DefluoLib/img/input/PlayStation",
+            "res://addons/DefluoLib/img/kenney_input/PlayStation",
             Variant.Type.String,
             PropertyHint.Dir
         );

@@ -368,12 +368,12 @@ public static class ControllerDigitalInput
     /// <summary>
     /// Left joystick pressed down (Xbox: LS, PS: L3)
     /// </summary>
-    public static readonly DigitalInput LeftStick = new(JoyButton.LeftStick);
+    public static readonly DigitalInput LeftStickPress = new(JoyButton.LeftStick);
 
     /// <summary>
     /// Right joystick pressed down (Xbox: RS, PS: R3)
     /// </summary>
-    public static readonly DigitalInput RightStick = new(JoyButton.RightStick);
+    public static readonly DigitalInput RightStickPress = new(JoyButton.RightStick);
 
     /// <summary>
     /// Xbox: Menu, PS: Options, Nintendo: +
@@ -381,7 +381,7 @@ public static class ControllerDigitalInput
     public static readonly DigitalInput Start = new(JoyButton.Start);
 
     /// <summary>
-    /// Xbox: Back, PS: Select, Nintendo: -
+    /// Xbox: Back, PS: Share, Nintendo: -
     /// </summary>
     public static readonly DigitalInput Select = new(JoyButton.Back);
 

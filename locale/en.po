@@ -389,11 +389,11 @@ msgstr "Right Shoulder"
 msgid "INPUT_JOYDIGITAL_TRIGGERRIGHT_POSITIVE"
 msgstr "Right Trigger"
 
-msgid "INPUT_JOYDIGITAL_LEFTSTICK"
-msgstr "Left Stick"
+msgid "INPUT_JOYDIGITAL_LEFTSTICKPRESS"
+msgstr "Left Stick Press"
 
-msgid "INPUT_JOYDIGITAL_RIGHTSTICK"
-msgstr "Right Stick"
+msgid "INPUT_JOYDIGITAL_RIGHTSTICKPRESS"
+msgstr "Right Stick Press"
 
 msgid "INPUT_JOYDIGITAL_START"
 msgstr "Start"
