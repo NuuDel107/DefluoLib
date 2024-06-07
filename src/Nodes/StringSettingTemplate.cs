@@ -8,7 +8,7 @@ namespace DefluoLib;
 internal partial class StringSettingTemplate : SettingTemplate
 {
     [Export]
-    public OptionButton Selector;
+    public NodePath Selector;
 
     private SettingString Setting;
 
@@ -16,25 +16,27 @@ internal partial class StringSettingTemplate : SettingTemplate
     {
         base.Initialize(setting);
         Setting = (SettingString)setting;
+        var selector = GetNode<OptionButton>(Selector);
 
+        selector.Clear();
         foreach (var possibleValue in Setting.PossibleValues)
         {
-            Selector.AddItem(possibleValue);
+            selector.AddItem(possibleValue);
         }
         var selectedIndex = Array.FindIndex(
             Setting.PossibleValues,
             value => value == Setting.Value
         );
-        Selector.Select(selectedIndex);
+        selector.Select(selectedIndex);
 
-        Selector.ItemSelected += (index) =>
+        selector.ItemSelected += (index) =>
         {
             Setting.Value = Setting.PossibleValues[index];
         };
 
         Defluo.Settings.SettingsReset += () =>
         {
-            Selector.Select(
+            selector.Select(
                 Setting.PossibleValues.ToList().FindIndex(value => value == Setting.Value)
             );
         };

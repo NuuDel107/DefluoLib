@@ -6,7 +6,7 @@ namespace DefluoLib;
 internal partial class BoolSettingTemplate : SettingTemplate
 {
     [Export]
-    public Button Selector;
+    public NodePath Selector;
 
     private SettingBool Setting;
 
@@ -14,16 +14,17 @@ internal partial class BoolSettingTemplate : SettingTemplate
     {
         base.Initialize(setting);
         Setting = (SettingBool)setting;
-        Selector.ButtonPressed = Setting.Value;
+        var selector = GetNode<Button>(Selector);
+        selector.ButtonPressed = Setting.Value;
 
-        Selector.Toggled += (value) =>
+        selector.Toggled += (value) =>
         {
             Setting.Value = value;
         };
 
         Defluo.Settings.SettingsReset += () =>
         {
-            Selector.SetPressedNoSignal(Setting.Value);
+            selector.SetPressedNoSignal(Setting.Value);
         };
     }
 }

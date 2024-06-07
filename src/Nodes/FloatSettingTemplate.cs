@@ -6,10 +6,10 @@ namespace DefluoLib;
 internal partial class FloatSettingTemplate : SettingTemplate
 {
     [Export]
-    public Slider SliderSelector;
+    public NodePath SliderSelector;
 
     [Export]
-    public SpinBox SpinBoxSelector;
+    public NodePath SpinBoxSelector;
 
     private SettingFloat Setting;
 
@@ -17,56 +17,58 @@ internal partial class FloatSettingTemplate : SettingTemplate
     {
         base.Initialize(setting);
         Setting = (SettingFloat)setting;
+        var sliderSelector = GetNode<Slider>(SliderSelector);
+        var spinBoxSelector = GetNode<SpinBox>(SpinBoxSelector);
 
-        if (SliderSelector != null)
+        if (sliderSelector != null)
         {
-            SliderSelector.MinValue = Setting.Constraints.Min;
-            SliderSelector.MaxValue = Setting.Constraints.Max;
-            SliderSelector.Step = Setting.Constraints.Step;
-            SliderSelector.Value = Setting.Value;
+            sliderSelector.MinValue = Setting.Constraints.Min;
+            sliderSelector.MaxValue = Setting.Constraints.Max;
+            sliderSelector.Step = Setting.Constraints.Step;
+            sliderSelector.Value = Setting.Value;
         }
-        if (SpinBoxSelector != null)
+        if (spinBoxSelector != null)
         {
             if (Setting.IsPercentage)
             {
-                SpinBoxSelector.Suffix = "%";
-                SpinBoxSelector.MinValue = Setting.Constraints.Min * 100;
-                SpinBoxSelector.MaxValue = Setting.Constraints.Max * 100;
-                SpinBoxSelector.Step = Setting.Constraints.Step * 100;
-                SpinBoxSelector.Value = Setting.Value * 100;
+                spinBoxSelector.Suffix = "%";
+                spinBoxSelector.MinValue = Setting.Constraints.Min * 100;
+                spinBoxSelector.MaxValue = Setting.Constraints.Max * 100;
+                spinBoxSelector.Step = Setting.Constraints.Step * 100;
+                spinBoxSelector.Value = Setting.Value * 100;
             }
             else
             {
-                SpinBoxSelector.MinValue = Setting.Constraints.Min;
-                SpinBoxSelector.MaxValue = Setting.Constraints.Max;
-                SpinBoxSelector.Step = Setting.Constraints.Step;
-                SpinBoxSelector.Value = Setting.Value;
+                spinBoxSelector.MinValue = Setting.Constraints.Min;
+                spinBoxSelector.MaxValue = Setting.Constraints.Max;
+                spinBoxSelector.Step = Setting.Constraints.Step;
+                spinBoxSelector.Value = Setting.Value;
             }
         }
 
-        SliderSelector.ValueChanged += (value) =>
+        sliderSelector.ValueChanged += (value) =>
         {
             Setting.Value = (float)value;
-            SpinBoxSelector?.SetValueNoSignal(value * (Setting.IsPercentage ? 100 : 1));
+            spinBoxSelector?.SetValueNoSignal(value * (Setting.IsPercentage ? 100 : 1));
         };
 
-        SpinBoxSelector.ValueChanged += (value) =>
+        spinBoxSelector.ValueChanged += (value) =>
         {
             if (Setting.IsPercentage)
             {
                 Setting.Value = (float)value / 100;
-                SliderSelector?.SetValueNoSignal(value / 100);
+                sliderSelector?.SetValueNoSignal(value / 100);
             }
             else
             {
                 Setting.Value = (float)value;
-                SliderSelector?.SetValueNoSignal(value);
+                sliderSelector?.SetValueNoSignal(value);
             }
         };
 
         Defluo.Settings.SettingsReset += () =>
         {
-            SliderSelector.Value = Setting.Value;
+            sliderSelector.Value = Setting.Value;
         };
     }
 }

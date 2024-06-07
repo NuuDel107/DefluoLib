@@ -6,10 +6,10 @@ namespace DefluoLib;
 internal partial class CategoryDivider : HBoxContainer
 {
     [Export]
-    public Label Label;
+    public NodePath Label;
 
     public void Initialize(string categoryName)
     {
-        Label.Text = categoryName;
+        GetNode<Label>(Label).Text = categoryName;
     }
 }

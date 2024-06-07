@@ -3,25 +3,24 @@ using System.Collections.Generic;
 
 namespace DefluoLib;
 
-[Tool]
 [GlobalClass]
 internal partial class KeybindTemplate : HBoxContainer
 {
     [Export]
-    public Label NameLabel;
+    public NodePath NameLabel;
 
     [ExportGroup("Keybind Buttons")]
     [Export]
-    public TextureButton Button1;
+    public NodePath Button1;
 
     [Export]
-    public TextureButton Button2;
+    public NodePath Button2;
 
     [Export]
-    public TextureButton Button3;
+    public NodePath Button3;
 
     [Export]
-    public TextureButton Button4;
+    public NodePath Button4;
 
     private Keybind Keybind;
 
@@ -30,21 +29,22 @@ internal partial class KeybindTemplate : HBoxContainer
     public void Initialize(Keybind keybind)
     {
         Keybind = keybind;
-        NameLabel.Text = keybind.DisplayName;
+        GetNode<Label>(NameLabel).Text = keybind.DisplayName;
 
         // Add buttons to list only if previous button has also been added
-        if (Button1 != null)
+        Buttons = new();
+        if (!Button1.IsEmpty)
         {
-            Buttons.Add(Button1);
-            if (Button2 != null)
+            Buttons.Add(GetNode<TextureButton>(Button1));
+            if (!Button2.IsEmpty)
             {
-                Buttons.Add(Button2);
-                if (Button3 != null)
+                Buttons.Add(GetNode<TextureButton>(Button2));
+                if (!Button3.IsEmpty)
                 {
-                    Buttons.Add(Button3);
-                    if (Button4 != null)
+                    Buttons.Add(GetNode<TextureButton>(Button3));
+                    if (!Button4.IsEmpty)
                     {
-                        Buttons.Add(Button4);
+                        Buttons.Add(GetNode<TextureButton>(Button4));
                     }
                 }
             }
@@ -54,6 +54,8 @@ internal partial class KeybindTemplate : HBoxContainer
         {
             if (keybind.BindedInputs.Count > index)
                 button.TextureNormal = Input.GetInputTexture(keybind.BindedInputs[index]);
+            else
+                button.TextureNormal = null;
 
             button.Pressed += async () =>
             {

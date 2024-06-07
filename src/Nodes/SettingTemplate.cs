@@ -6,10 +6,10 @@ namespace DefluoLib;
 
 [Tool]
 [GlobalClass]
-internal abstract partial class SettingTemplate : Control
+internal abstract partial class SettingTemplate : HBoxContainer
 {
     [Export]
-    public Label NameLabel;
+    public NodePath NameLabel;
 
     public int SettingIndex = 0;
 
@@ -36,6 +36,6 @@ internal abstract partial class SettingTemplate : Control
 
     public virtual void Initialize(SettingBase setting)
     {
-        NameLabel.Text = setting.DisplayName;
+        GetNode<Label>(NameLabel).Text = setting.DisplayName;
     }
 }
