@@ -179,6 +179,23 @@ public class DigitalInput
     public bool Equals(JoyAxis joyAxis, bool positiveAnalog) =>
         Type == DigitalInputType.JoyAxis && (JoyAxis)EnumValue == joyAxis && positiveAnalog == PositiveAnalog;
 
+    public bool Equals(DigitalInput input)
+    {
+        if (input.Type == Type)
+            switch (Type)
+            {
+                case DigitalInputType.Key:
+                    return Equals(input.Key);
+                case DigitalInputType.MouseButton:
+                    return Equals(input.MouseButton);
+                case DigitalInputType.JoyButton:
+                    return Equals(input.JoyButton);
+                case DigitalInputType.JoyAxis:
+                    return Equals(input.JoyAxis, input.PositiveAnalog);
+            }
+        return false;
+    }
+
     /// <summary>
     /// Parses the pressed state from event, if event applies to digital input
     /// </summary>

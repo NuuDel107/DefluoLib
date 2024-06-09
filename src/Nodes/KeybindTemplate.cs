@@ -18,13 +18,14 @@ internal partial class KeybindTemplate : HBoxContainer
 
     [Export]
     public NodePath Button3;
-
     [Export]
     public NodePath Button4;
 
-    private Keybind Keybind;
+    public Keybind Keybind;
+    public DigitalInput[] KeyboardInputs;
+    public DigitalInput[] ControllerInputs;
 
-    public List<Button> Buttons = new();
+    public List<Button> Buttons;
 
     public void Initialize(Keybind keybind)
     {
@@ -50,26 +51,117 @@ internal partial class KeybindTemplate : HBoxContainer
             }
         }
 
+        // Sort keyboard inputs and controllerinputs into their separate arrays
+        KeyboardInputs = new DigitalInput[Buttons.Count];
+        ControllerInputs = new DigitalInput[Buttons.Count];
+
+        var k = 0;
+        var c = 0;
+        foreach (var input in Keybind.BindedInputs)
+        {
+            if (input.Type == DigitalInputType.Key || input.Type == DigitalInputType.MouseButton)
+            {
+                KeyboardInputs[k] = input;
+                k++;
+            }
+            else
+            {
+                ControllerInputs[c] = input;
+                c++;
+            }
+        }
+
+        UpdateIcons(Defluo.Input.UsingControllerInput);
+        Defluo.Input.InputTypeChanged += UpdateIcons;
+
         foreach (var (button, index) in Buttons.WithIndex())
         {
-            if (keybind.BindedInputs.Count > index)
-                button.Icon = Input.GetInputTexture(keybind.BindedInputs[index]);
-            else
-                button.Icon = null;
-
             button.Pressed += async () =>
             {
+                // Set rebinding state to true so menu UI code
+                // knows to ignore UICancel keybind
+                Defluo.Input.RebindingButton = true;
+
+                // Lock button for input picking
                 button.Icon = null;
                 button.FocusMode = FocusModeEnum.None;
-                // Await for UI input to release
-                await Defluo.Input.AwaitForDigitalInput(pressed: false);
+                button.Disabled = true;
+
                 // Save next digital input as keybind
                 var input = await Defluo.Input.AwaitForDigitalInput(pressed: false);
+
+                // Change keybind on currently active input type
+                var controllerInput = Defluo.Input.UsingControllerInput;
+                if (controllerInput)
+                    ControllerInputs[index] = input;
+                else
+                    KeyboardInputs[index] = input;
+
+                // Release button
+                button.Disabled = false;
                 button.FocusMode = FocusModeEnum.All;
                 button.GrabFocus();
-                Keybind.BindedInputs[index] = input;
-                button.Icon = Input.GetInputTexture(input);
+
+                // Update keybind list and icons
+                UpdateInputs();
+                UpdateIcons(Defluo.Input.UsingControllerInput);
+
+                // If cancel button is pressed after assignment, input should be unbinded
+                var cancelInput = await Defluo.Input.AwaitForDigitalInput(pressed: true);
+                foreach (var bindedInput in Defluo.Input.UICancel.BindedInputs)
+                {
+                    if (bindedInput.Equals(cancelInput))
+                    {
+                        if (controllerInput)
+                            ControllerInputs[index] = null;
+                        else
+                            KeyboardInputs[index] = null;
+
+                        UpdateInputs();
+                        UpdateIcons(Defluo.Input.UsingControllerInput);
+                        break;
+                    }
+                }
+
+                // Wait for two frames before updating rebinding state so UI code can ignore input
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                Defluo.Input.RebindingButton = false;
             };
+        }
+
+    }
+
+    /// <summary>
+    /// Updates the input list on associated keybind
+    /// </summary>
+    private void UpdateInputs()
+    {
+        Keybind.BindedInputs = new();
+        foreach (var input in ControllerInputs)
+        {
+            if (input != null)
+                Keybind.BindedInputs.Add(input);
+        }
+        foreach (var input in KeyboardInputs)
+        {
+            if (input != null)
+                Keybind.BindedInputs.Add(input);
+        }
+    }
+
+    /// <summary>
+    /// Updates the associated UI button icons depending on current input type
+    /// </summary>
+    /// <param name="controllerInput"></param>
+    private void UpdateIcons(bool controllerInput)
+    {
+        foreach (var (input, index) in (controllerInput ? ControllerInputs : KeyboardInputs).WithIndex())
+        {
+            if (input == null || Buttons[index].Disabled)
+                Buttons[index].Icon = null;
+            else
+                Buttons[index].Icon = Input.GetInputTexture(input);
         }
     }
 }

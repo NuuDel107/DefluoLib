@@ -13,6 +13,11 @@ namespace DefluoLib;
 public class Mouse
 {
     /// <summary>
+    /// Threshold for when mouse is detected to be moved.
+    /// </summary>
+    public const float DefaultVelocityThreshold = 10;
+
+    /// <summary>
     /// Current position of mouse pointer in viewport
     /// </summary>
     public Vector2 Position { get; private set; }
@@ -141,6 +146,40 @@ public partial class Input : Node
         }
     }
 
+    /// <summary>
+    /// If true, a keybinding button is listening for input, meaning that next received input will be
+    /// registered as a keybind and probably should not be used for anything else.
+    /// </summary>
+    /// <value></value>
+    public bool RebindingButton { get; internal set; } = false;
+
+    /// <summary>
+    /// If true, controller input was last used.
+    /// If false, keyboard and mouse input was last used.
+    /// </summary>
+    public bool UsingControllerInput = false;
+
+    /// <summary>
+    /// Event that is invoked when input type changes between controller and keyboard.
+    /// </summary>
+    public event Action<bool> InputTypeChanged;
+
+    /// <summary>
+    /// Event that is invoked when a digital input is pressed.
+    /// Action parameters: input that was pressed, pressed state of input (<c>true</c> = pressed)
+    /// </summary>
+    public event Action<DigitalInput, bool> DigitalInputPressed;
+
+    /// <summary>
+    /// Global UI accept action. Triggered by the keyboard buttons <c>Enter</c> and <c>Space</c> and the controller <c>A</c> button.
+    /// </summary>
+    [CreateCategory("UI")]
+    public Keybind UIAccept { get; set; } = new Keybind("UI Accept", new KeybindOptions(isEssential: true, canBeRebinded: false), KeyboardInput.Enter, KeyboardInput.Space, ControllerDigitalInput.A);
+    /// <summary>
+    /// Global UI cancel action. Triggered by the keyboard buttons <c>Escape</c> and<c>Backspace</c> and the controller <c>B</c> button.
+    /// </summary>
+    public Keybind UICancel { get; set; } = new Keybind("UI Cancel", new KeybindOptions(isEssential: true, canBeRebinded: false), KeyboardInput.Escape, KeyboardInput.Backspace, ControllerDigitalInput.B);
+
     private List<PropertyInfo> properties;
     private List<Keybind> keybinds;
     private DictionaryResource defaultKeybindResource;
@@ -181,73 +220,42 @@ public partial class Input : Node
         SaveKeybinds();
     }
 
-    /// <summary>
-    /// Returns a list of defined keybind properties
-    /// </summary>
-    /// <returns></returns>
-    internal static List<PropertyInfo> GetKeybindProperties()
-    {
-        IEnumerable<PropertyInfo> list =
-            from property in typeof(Input).GetProperties()
-            where typeof(Keybind).IsAssignableFrom(property.PropertyType)
-            select property;
-
-        return list.ToList();
-    }
-
-    /// <summary>
-    /// Returns a list of defined keybinds
-    /// </summary>
-    public List<Keybind> GetKeybinds()
-    {
-        List<Keybind> list = properties
-            .Select(property => (Keybind)property.GetValue(this))
-            .ToList();
-
-        return list.ToList();
-    }
-
-    /// <summary>
-    /// Event that is invoked when a digital input is pressed.
-    /// Action parameters: input that was pressed, pressed state of input (<c>true</c> = pressed)
-    /// </summary>
-    public event Action<DigitalInput, bool> DigitalInputPressed;
-
-    /// <summary>
-    /// Waits for a digital input to be pressed, and returns it
-    /// </summary>
-    /// <param name="pressed">
-    /// Whether or not digital input should be pressed down.
-    /// If unspecified, will return input regardless of its pressed state.
-    /// </param>
-    public Task<DigitalInput> AwaitForDigitalInput(bool? pressed = null)
-    {
-        var result = new TaskCompletionSource<DigitalInput>();
-        void eventHandler(DigitalInput input, bool inputPressed)
-        {
-            if (pressed.HasValue)
-            {
-                if (inputPressed == pressed)
-                {
-                    result.SetResult(input);
-                    DigitalInputPressed -= eventHandler;
-                }
-            }
-            else
-            {
-                result.SetResult(input);
-                DigitalInputPressed -= eventHandler;
-            }
-
-        }
-        DigitalInputPressed += eventHandler;
-        return result.Task;
-    }
-
-    public override void _UnhandledInput(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
         if (InputLogging)
             GD.Print(@event.AsText());
+
+        // Set controller input usage according to event type
+        switch (@event)
+        {
+            case InputEventMouseMotion:
+            case InputEventMouseButton:
+            case InputEventKey:
+                // Don't change input type if mouse movement velocity is below default threshold
+                if (@event is InputEventMouseMotion mouseEvent && mouseEvent.Velocity.Length() < Mouse.DefaultVelocityThreshold)
+                {
+                    break;
+                }
+                if (UsingControllerInput && InputTypeChanged != null)
+                {
+                    InputTypeChanged.Invoke(false);
+                }
+                UsingControllerInput = false;
+                break;
+            case InputEventJoypadMotion:
+            case InputEventJoypadButton:
+                // Don't change input type if axis input value is below default threshold
+                if (@event is InputEventJoypadMotion joypadEvent && Mathf.Abs(joypadEvent.AxisValue) < Keybind.DefaultAxisThreshold)
+                {
+                    break;
+                }
+                if (!UsingControllerInput && InputTypeChanged != null)
+                {
+                    InputTypeChanged.Invoke(true);
+                }
+                UsingControllerInput = true;
+                break;
+        }
 
         if (@event is InputEventMouseMotion mouseMotionEvent)
         {
@@ -325,6 +333,63 @@ public partial class Input : Node
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Returns a list of defined keybind properties
+    /// </summary>
+    /// <returns></returns>
+    internal static List<PropertyInfo> GetKeybindProperties()
+    {
+        IEnumerable<PropertyInfo> list =
+            from property in typeof(Input).GetProperties()
+            where typeof(Keybind).IsAssignableFrom(property.PropertyType)
+            select property;
+
+        return list.ToList();
+    }
+
+    /// <summary>
+    /// Returns a list of defined keybinds
+    /// </summary>
+    public List<Keybind> GetKeybinds()
+    {
+        List<Keybind> list = properties
+            .Select(property => (Keybind)property.GetValue(this))
+            .ToList();
+
+        return list.ToList();
+    }
+
+    /// <summary>
+    /// Waits for a digital input to be pressed, and returns it
+    /// </summary>
+    /// <param name="pressed">
+    /// Whether or not digital input should be pressed down.
+    /// If unspecified, will return input regardless of its pressed state.
+    /// </param>
+    public Task<DigitalInput> AwaitForDigitalInput(bool? pressed = null)
+    {
+        var result = new TaskCompletionSource<DigitalInput>();
+        void eventHandler(DigitalInput input, bool inputPressed)
+        {
+            if (pressed.HasValue)
+            {
+                if (inputPressed == pressed)
+                {
+                    result.SetResult(input);
+                    DigitalInputPressed -= eventHandler;
+                }
+            }
+            else
+            {
+                result.SetResult(input);
+                DigitalInputPressed -= eventHandler;
+            }
+
+        }
+        DigitalInputPressed += eventHandler;
+        return result.Task;
     }
 
     /// <summary>
