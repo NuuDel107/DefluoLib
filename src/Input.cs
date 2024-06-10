@@ -174,11 +174,32 @@ public partial class Input : Node
     /// Global UI accept action. Triggered by the keyboard buttons <c>Enter</c> and <c>Space</c> and the controller <c>A</c> button.
     /// </summary>
     [CreateCategory("UI")]
-    public Keybind UIAccept { get; set; } = new Keybind("UI Accept", new KeybindOptions(isEssential: true, canBeRebinded: false), KeyboardInput.Enter, KeyboardInput.Space, ControllerDigitalInput.A);
+    public Keybind UIAccept { get; set; } =
+        new Keybind(
+            "UI Accept",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Enter,
+            KeyboardInput.Space,
+            ControllerDigitalInput.A
+        );
+
     /// <summary>
     /// Global UI cancel action. Triggered by the keyboard buttons <c>Escape</c> and<c>Backspace</c> and the controller <c>B</c> button.
     /// </summary>
-    public Keybind UICancel { get; set; } = new Keybind("UI Cancel", new KeybindOptions(isEssential: true, canBeRebinded: false), KeyboardInput.Escape, KeyboardInput.Backspace, ControllerDigitalInput.B);
+    public Keybind UICancel { get; set; } =
+        new Keybind(
+            "UI Cancel",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Escape,
+            KeyboardInput.Backspace,
+            ControllerDigitalInput.B
+        );
+
+    /// <summary>
+    /// Stores the previously stored pressed states of joy axis inputs.
+    /// This is required to properly send pressed and released signals.
+    /// </summary>
+    public Dictionary<string, bool> JoyAxisLatestPressedStates = new();
 
     private List<PropertyInfo> properties;
     private List<Keybind> keybinds;
@@ -232,7 +253,10 @@ public partial class Input : Node
             case InputEventMouseButton:
             case InputEventKey:
                 // Don't change input type if mouse movement velocity is below default threshold
-                if (@event is InputEventMouseMotion mouseEvent && mouseEvent.Velocity.Length() < Mouse.DefaultVelocityThreshold)
+                if (
+                    @event is InputEventMouseMotion mouseEvent
+                    && mouseEvent.Velocity.Length() < Mouse.DefaultVelocityThreshold
+                )
                 {
                     break;
                 }
@@ -245,7 +269,10 @@ public partial class Input : Node
             case InputEventJoypadMotion:
             case InputEventJoypadButton:
                 // Don't change input type if axis input value is below default threshold
-                if (@event is InputEventJoypadMotion joypadEvent && Mathf.Abs(joypadEvent.AxisValue) < Keybind.DefaultAxisThreshold)
+                if (
+                    @event is InputEventJoypadMotion joypadEvent
+                    && Mathf.Abs(joypadEvent.AxisValue) < Keybind.DefaultAxisThreshold
+                )
                 {
                     break;
                 }
@@ -281,24 +308,31 @@ public partial class Input : Node
                         ActivateKeybind(keybind, pressed.Value);
                         break;
                     }
-
                 }
             }
-
-            // If analog value is below the digital input threshold,
-            // don't register it as a digital input event
-            if (
-                @event is InputEventJoypadMotion analogEvent
-                && Mathf.Abs(analogEvent.AxisValue) < Keybind.DefaultAxisThreshold
-            )
-                return;
 
             // Parse DigitalInput from input event
             var input = DigitalInput.FromEvent(@event);
             // Invoke input event if input could be parsed
             // ParseValue should always return a boolean since the event applies to input
             if (DigitalInputPressed != null && input != null)
-                DigitalInputPressed.Invoke(input, input.ParseValue(@event).Value);
+            {
+                var value = input.ParseValue(@event).Value;
+                // If event is an analog event, invoke event only if pressed state has changed
+                if (@event is InputEventJoypadMotion)
+                {
+                    if (!JoyAxisLatestPressedStates.ContainsKey(input.DisplayString))
+                        JoyAxisLatestPressedStates.Add(input.DisplayString, value);
+                    if (JoyAxisLatestPressedStates[input.DisplayString] != value)
+                    {
+                        GD.Print(value);
+                        DigitalInputPressed.Invoke(input, value);
+                        JoyAxisLatestPressedStates[input.DisplayString] = value;
+                    }
+                }
+                else
+                    DigitalInputPressed.Invoke(input, value);
+            }
         }
     }
 
@@ -319,7 +353,6 @@ public partial class Input : Node
             }
         }
     }
-
 
     public override void _Notification(int what)
     {
@@ -386,7 +419,6 @@ public partial class Input : Node
                 result.SetResult(input);
                 DigitalInputPressed -= eventHandler;
             }
-
         }
         DigitalInputPressed += eventHandler;
         return result.Task;
@@ -489,7 +521,9 @@ public partial class Input : Node
             if (keybind.Options.CanBeRebinded)
                 newResource.Dictionary.Add(
                     keybind.DisplayName,
-                    new Godot.Collections.Array(keybind.BindedInputs.Select(input => (Variant)input))
+                    new Godot.Collections.Array(
+                        keybind.BindedInputs.Select(input => (Variant)input)
+                    )
                 );
         }
         return newResource;
