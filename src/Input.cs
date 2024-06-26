@@ -338,18 +338,38 @@ public partial class Input : Node
 
     public override void _Process(double delta)
     {
-        // Update just pressed and just released variables of registered keybinds
+        // Update process frame versions of just pressed and just released variables 
+        // of all registered keybinds
         foreach (var keybind in keybinds)
         {
             if (keybind.IsPressed)
             {
-                keybind.IsJustPressed = keybind.FramesHeldDown == 0;
-                keybind.FramesHeldDown++;
+                keybind.ProcessIsJustPressed = keybind.ProcessFramesHeldDown == 0;
+                keybind.ProcessFramesHeldDown++;
             }
             else
             {
-                keybind.IsJustReleased = keybind.FramesHeldDown != 0;
-                keybind.FramesHeldDown = 0;
+                keybind.ProcessIsJustReleased = keybind.ProcessFramesHeldDown != 0;
+                keybind.ProcessFramesHeldDown = 0;
+            }
+        }
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        // Update physics frame versions of just pressed and just released variables 
+        // of all registered keybinds
+        foreach (var keybind in keybinds)
+        {
+            if (keybind.IsPressed)
+            {
+                keybind.PhysicsIsJustPressed = keybind.PhysicsFramesHeldDown == 0;
+                keybind.PhysicsFramesHeldDown++;
+            }
+            else
+            {
+                keybind.PhysicsIsJustReleased = keybind.PhysicsFramesHeldDown != 0;
+                keybind.PhysicsFramesHeldDown = 0;
             }
         }
     }

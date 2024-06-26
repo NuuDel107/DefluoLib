@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 namespace DefluoLib;
 
@@ -34,18 +35,33 @@ public class Keybind
     /// <summary>
     /// Amount of process frames that keybind has been held down
     /// </summary>
-    public int FramesHeldDown { get; internal set; } = 0;
+    public int ProcessFramesHeldDown { get; internal set; } = 0;
+
+    /// <summary>
+    /// Amount of physics frames that keybind has been held down
+    /// </summary>
+    public int PhysicsFramesHeldDown { get; internal set; } = 0;
+
+    internal bool ProcessIsJustPressed;
+    internal bool ProcessIsJustReleased;
+    internal bool PhysicsIsJustPressed;
+    internal bool PhysicsIsJustReleased;
 
     /// <summary>
     /// If keybind has been pressed down this frame
     /// </summary>
-    public bool IsJustPressed { get; internal set; } = false;
+    public bool IsJustPressed
+    {
+        get => Engine.IsInPhysicsFrame() ? PhysicsIsJustPressed : ProcessIsJustPressed;
+    }
 
     /// <summary>
     /// If keybind has been released this frame
     /// </summary>
-    public bool IsJustReleased { get; internal set; } = false;
-
+    public bool IsJustReleased
+    {
+        get => Engine.IsInPhysicsFrame() ? PhysicsIsJustReleased : ProcessIsJustReleased;
+    }
 
     /// <summary>
     /// List of inputs binded to this action,
@@ -93,16 +109,13 @@ public class Keybind
         onPressedActions.Add(action);
     }
 
-    public Keybind(
-        string displayName,
-        KeybindOptions options,
-        params DigitalInput[] inputs
-    )
+    public Keybind(string displayName, KeybindOptions options, params DigitalInput[] inputs)
     {
         DisplayName = displayName;
         Options = options;
         BindedInputs = inputs.ToList();
     }
+
     public Keybind(string displayName, params DigitalInput[] inputs)
         : this(displayName, new(), inputs) { }
 }
@@ -137,7 +150,11 @@ public class KeybindOptions
     /// Threshold for when an analog input is determined to in the pressed state.
     /// Used only if axis inputs have been binded to this keybind
     /// </param>
-    public KeybindOptions(bool isEssential = false, bool canBeRebinded = true, float axisThreshold = Keybind.DefaultAxisThreshold)
+    public KeybindOptions(
+        bool isEssential = false,
+        bool canBeRebinded = true,
+        float axisThreshold = Keybind.DefaultAxisThreshold
+    )
     {
         AxisThreshold = axisThreshold;
         IsEssential = isEssential;
