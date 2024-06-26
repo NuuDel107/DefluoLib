@@ -208,7 +208,7 @@ public class FMODEventInstance : FMODInstance
     /// <summary>
     /// Pauses or unpauses the event playback
     /// </summary>
-    public void SetPaused(bool paused) => Call("pause_instance", Instance, paused);
+    public void SetPaused(bool paused) => Call("set_instance_paused", Instance, paused);
 
     /// <summary>
     /// Queues event instance for release. The released state is updated when the instance is released.
@@ -291,14 +291,16 @@ public partial class FMODHandler : Node
     /// </summary>
     /// <param name="eventPath">Name of the event</param>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void PlayEvent(string eventPath, params (string Name, Variant Value)[] parameters) => CreateEventInstance(eventPath).PlayOneShot(parameters);
+    public void PlayEvent(string eventPath, params (string Name, Variant Value)[] parameters) =>
+        CreateEventInstance(eventPath).PlayOneShot(parameters);
 
     /// <summary>
     /// Plays event once and releases the event instance afterwards
     /// </summary>
     /// <param name="eventAsset">Event asset that the played instance will be created from</param>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void PlayEvent(FMODEvent eventAsset, params (string Name, Variant Value)[] parameters) => PlayEvent(eventAsset.Path, parameters);
+    public void PlayEvent(FMODEvent eventAsset, params (string Name, Variant Value)[] parameters) =>
+        PlayEvent(eventAsset.Path, parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
@@ -306,8 +308,11 @@ public partial class FMODHandler : Node
     /// <param name="eventPath">Name of the event</param>
     /// <param name="attachedNode">3D node that is attached to the event</param>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void PlayEvent(string eventPath, Node3D attachedNode, params (string Name, Variant Value)[] parameters) =>
-        CreateEventInstance(eventPath, attachedNode).PlayOneShot(parameters);
+    public void PlayEvent(
+        string eventPath,
+        Node3D attachedNode,
+        params (string Name, Variant Value)[] parameters
+    ) => CreateEventInstance(eventPath, attachedNode).PlayOneShot(parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
@@ -315,8 +320,11 @@ public partial class FMODHandler : Node
     /// <param name="eventAsset">Event asset that the played instance will be created from</param>
     /// <param name="attachedNode">3D node that is attached to the event</param>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void PlayEvent(FMODEvent eventAsset, Node3D attachedNode, params (string Name, Variant Value)[] parameters) =>
-        PlayEvent(eventAsset.Path, attachedNode, parameters);
+    public void PlayEvent(
+        FMODEvent eventAsset,
+        Node3D attachedNode,
+        params (string Name, Variant Value)[] parameters
+    ) => PlayEvent(eventAsset.Path, attachedNode, parameters);
 
     /// <summary>
     /// Sets the value of a number parameter in global scope
@@ -345,7 +353,6 @@ public partial class FMODHandler : Node
         else
             GDScriptNode.Call("set_global_float_parameter", parameter.Name, parameter.Value);
     }
-
 
     /// <summary>
     /// Stops all created event instances and releases them
