@@ -71,21 +71,16 @@ public class Keybind
 
     public KeybindOptions Options { get; internal set; }
 
-    private List<Action> onPressedActions = new();
-    private List<Action> onReleasedActions = new();
-
     /// <summary>
-    /// Activate the action, running all functions that are subscribed to it
+    /// Activate the action, invoking correct event
     /// </summary>
     public void Activate(bool pressed)
     {
         IsPressed = pressed;
         if (pressed)
-            foreach (var action in onPressedActions)
-                action();
+            Pressed?.Invoke();
         else
-            foreach (var action in onReleasedActions)
-                action();
+            Released?.Invoke();
     }
 
     internal void SetCategory(string category)
@@ -94,20 +89,14 @@ public class Keybind
     }
 
     /// <summary>
-    /// Define a function that is ran when the keybind is pressed
+    /// Fired when keybind is pressed
     /// </summary>
-    public void OnPressed(Action action)
-    {
-        onPressedActions.Add(action);
-    }
+    public event Action Pressed;
 
     /// <summary>
-    /// Define a function that is ran when the keybind is released
+    /// Fired when keybind is released
     /// </summary>
-    public void OnReleased(Action action)
-    {
-        onPressedActions.Add(action);
-    }
+    public event Action Released;
 
     public Keybind(string displayName, KeybindOptions options, params DigitalInput[] inputs)
     {

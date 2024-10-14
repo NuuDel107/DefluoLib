@@ -23,32 +23,14 @@ public class Mouse
     public Vector2 Position { get; private set; }
 
     /// <summary>
-    /// Position of mouse pointer in viewport relative to previous mouse position change
-    /// </summary>
-    public Vector2 RelativePosition { get; private set; }
-
-    private List<Action<Vector2>> movementActions = new();
-    private List<Action<Vector2>> relativeMovementActions = new();
-
-    /// <summary>
     /// Update position of mouse and run defined functions
     /// </summary>
     /// <param name="pos">Current position of mouse in viewport</param>
     /// <param name="relativePos">Position of mouse in relation to the last frame</param>
-    internal void UpdatePosition(Vector2 pos, Vector2 relativePos)
+    internal void Update(InputEventMouseMotion mouseMotionEvent)
     {
-        Position = pos;
-        RelativePosition = relativePos;
-
-        foreach (var function in movementActions)
-        {
-            function(pos);
-        }
-
-        foreach (var function in relativeMovementActions)
-        {
-            function(relativePos);
-        }
+        Moved?.Invoke(mouseMotionEvent);
+        Position = mouseMotionEvent.Position;
     }
 
     /// <summary>
@@ -58,28 +40,9 @@ public class Mouse
     public void Warp(Vector2 position) => Godot.Input.WarpMouse(position);
 
     /// <summary>
-    /// Define a function that is ran when the mouse is moved
+    /// Fired when mouse is moved
     /// </summary>
-    /// <param name="action">
-    ///     Function that is ran on mouse movement.
-    ///     The parameter represents the current position of the mouse in viewport
-    /// </param>
-    public void OnMovement(Action<Vector2> action)
-    {
-        movementActions.Add(action);
-    }
-
-    /// <summary>
-    /// Define a function that is ran when the mouse is moved
-    /// </summary>
-    /// <param name="action">
-    ///     Function that is ran on mouse movement.
-    ///     The parameter represents the position of the mouse in viewport relative to last frame
-    /// </param>
-    public void OnRelativeMovement(Action<Vector2> action)
-    {
-        relativeMovementActions.Add(action);
-    }
+    public event Action<InputEventMouseMotion> Moved;
 }
 
 /// <summary>
@@ -117,12 +80,14 @@ public partial class Input : Node
         }
     }
 
+    private bool disabled;
+
     /// <summary>
     /// If input class is currently disabled,
     /// meaning non-essential actions are never triggered.
-    /// Use this to
+    /// Use this to pause the game and still keep essential keybinds functional,
+    /// such as the pause key
     /// </summary>
-    private bool disabled;
     public bool Disabled
     {
         get { return disabled; }
@@ -288,7 +253,7 @@ public partial class Input : Node
         {
             if (!Disabled)
                 // Update mouse class with the position and relative position vectors
-                Mouse.UpdatePosition(mouseMotionEvent.Position, mouseMotionEvent.Relative);
+                Mouse.Update(mouseMotionEvent);
         }
         else
         {
@@ -338,7 +303,7 @@ public partial class Input : Node
 
     public override void _Process(double delta)
     {
-        // Update process frame versions of just pressed and just released variables 
+        // Update process frame versions of just pressed and just released variables
         // of all registered keybinds
         foreach (var keybind in keybinds)
         {
@@ -357,7 +322,7 @@ public partial class Input : Node
 
     public override void _PhysicsProcess(double delta)
     {
-        // Update physics frame versions of just pressed and just released variables 
+        // Update physics frame versions of just pressed and just released variables
         // of all registered keybinds
         foreach (var keybind in keybinds)
         {
