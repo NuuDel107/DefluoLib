@@ -7,9 +7,9 @@ using System.Linq;
 namespace DefluoLib;
 
 /// <summary>
-/// Base abstract class for a setting value
+/// A setting value representing a variant.
 /// </summary>
-public abstract class SettingBase
+public class VariantSetting
 {
     private Variant _value;
     public Variant Value
@@ -17,209 +17,81 @@ public abstract class SettingBase
         get { return _value; }
         set
         {
-            foreach (var function in subscribeFunctions)
-                function(value);
+            ValueChanged?.Invoke(value);
             _value = value;
         }
     }
 
+    public Godot.Variant.Type Type = Variant.Type.Nil;
     public Variant DefaultValue;
 
-    /// <summary>
-    /// Name that is displayed in the settings UI
-    /// </summary>
-    public string DisplayName;
-
-    /// <summary>
-    /// Optionally defined category for the setting
-    /// </summary>
-    public string Category;
-
-    private List<Action<Variant>> subscribeFunctions = new();
-
-    protected SettingBase(string displayName, Variant defaultValue)
+    public VariantSetting(Variant defaultValue)
     {
-        DisplayName = displayName;
         Value = DefaultValue = defaultValue;
     }
 
-    public void Subscribe(Action<Variant> function)
-    {
-        subscribeFunctions.Add(function);
-        function(Value);
-    }
-
-    internal void SetCategory(string categoryName)
-    {
-        Category = categoryName;
-    }
+    public event Action<Variant> ValueChanged;
 }
 
 /// <summary>
-/// A setting value that represents a boolean.
-/// Define one as a property in a partial class declaration to register it to the settings.
+/// A setting value representing a boolean.
 /// </summary>
-public class SettingBool : SettingBase
+public class BoolSetting : VariantSetting
 {
-    /// <summary>
-    /// Current value of the setting. Changing the value runs subscribed callback functions.
-    /// </summary>
-    new public bool Value
+    public BoolSetting(bool defaultValue)
+        : base(defaultValue)
     {
-        get { return (bool)base.Value; }
-        set { base.Value = value; }
+        Type = Variant.Type.Bool;
+        base.ValueChanged += value => ValueChanged?.Invoke(value.As<bool>());
     }
 
-    /// <summary>
-    /// Default boolean value of the setting
-    /// </summary>
-    new public bool DefaultValue
-    {
-        get { return (bool)base.DefaultValue; }
-        set { base.DefaultValue = value; }
-    }
-
-    /// <param name="displayName">Name that is displayed in the settings UI</param>
-    /// <param name="defaultValue">Default boolean value of the setting</param>
-    public SettingBool(string displayName, bool defaultValue)
-        : base(displayName, defaultValue) { }
-
-    /// <summary>
-    /// Subscribes a callback to value changes of the setting
-    /// </summary>
-    /// <param name="function">Action that is ran when the value of the setting changes</param>
-    public void Subscribe(Action<bool> function) =>
-        Subscribe(new Action<Variant>(v => function((bool)v)));
+    public new event Action<bool> ValueChanged;
 }
 
 /// <summary>
-/// A setting value that represents a floating point number.
-/// Define one as a property in a partial class declaration to register it to the settings.
+/// A setting value representing a float.
 /// </summary>
-public class SettingFloat : SettingBase
+public class FloatSetting : VariantSetting
 {
-    /// <summary>
-    /// Constraints for acceptable number values
-    /// </summary>
-    public (float Min, float Max, float Step) Constraints;
-
-    /// <summary>
-    /// If true, setting is displayed as a percentage in the UI
-    /// </summary>
-    public bool IsPercentage;
-
-    /// <summary>
-    /// Current value of the setting. Changing the value runs subscribed callback functions.
-    /// </summary>
-    new public float Value
+    public FloatSetting(float defaultValue)
+        : base(defaultValue)
     {
-        get { return (float)base.Value; }
-        set
-        {
-            base.Value = Mathf.Clamp(
-                Mathf.Round(value / Constraints.Step) * Constraints.Step,
-                Constraints.Min,
-                Constraints.Max
-            );
-        }
+        Type = Variant.Type.Float;
+        base.ValueChanged += value => ValueChanged?.Invoke(value.As<float>());
     }
 
-    /// <summary>
-    /// Default number value of the setting
-    /// </summary>
-    new public float DefaultValue
-    {
-        get { return (float)base.DefaultValue; }
-        set { base.DefaultValue = value; }
-    }
-
-    /// <param name="displayName">Name that is displayed in the settings UI</param>
-    /// <param name="defaultValue">Default number value of the setting</param>
-    /// <param name="constraints">Constraints for acceptable number values</param>
-    public SettingFloat(
-        string displayName,
-        float defaultValue,
-        (float Min, float Max, float Step) constraints
-    )
-        : this(displayName, defaultValue, constraints, isPercentage: false) { }
-
-    /// <param name="displayName">Name that is displayed in the settings UI</param>
-    /// <param name="defaultValue">Default number value of the setting</param>
-    /// <param name="constraints">Constraints for acceptable number values</param>
-    /// <param name="isPercentage">If true, setting is displayed as a percentage in the UI</param>
-    public SettingFloat(
-        string displayName,
-        float defaultValue,
-        (float Min, float Max, float Step) constraints,
-        bool isPercentage
-    )
-        : base(displayName, defaultValue)
-    {
-        Constraints = constraints;
-        IsPercentage = isPercentage;
-    }
-
-    /// <summary>
-    /// Subscribes a callback to value changes of the setting
-    /// </summary>
-    /// <param name="function">Action that is ran when the value of the setting changes</param>
-    public void Subscribe(Action<float> function) =>
-        Subscribe(new Action<Variant>(v => function((float)v)));
+    public new event Action<float> ValueChanged;
 }
 
 /// <summary>
-/// A setting value that represents a string.
-/// Define one as a property in a partial class declaration to register it to the settings.
+/// A setting value representing an enum.
 /// </summary>
-public class SettingString : SettingBase
+public class EnumSetting<T> : VariantSetting
+    where T : System.Enum
 {
-    /// <summary>
-    /// Possible string values for the setting. Used to populate a dropdown UI
-    /// </summary>
-    public string[] PossibleValues;
-
-    /// <summary>
-    /// Current value of the setting. Changing the value runs subscribed callback functions.
-    /// </summary>
-    new public string Value
+    public EnumSetting(int defaultValue)
+        : base(defaultValue)
     {
-        get { return (string)base.Value; }
-        set { base.Value = PossibleValues.Contains(value) ? value : PossibleValues[0]; }
+        Type = Variant.Type.Int;
+        base.ValueChanged += value => ValueChanged?.Invoke(value.As<T>());
     }
 
-    /// <summary>
-    /// Default string value of the setting
-    /// </summary>
-    new public string DefaultValue
+    public new event Action<T> ValueChanged;
+}
+
+/// <summary>
+/// A setting value representing a string.
+/// </summary>
+public class StringSetting : VariantSetting
+{
+    public StringSetting(string defaultValue)
+        : base(defaultValue)
     {
-        get { return (string)base.DefaultValue; }
-        set { base.DefaultValue = value; }
+        Type = Variant.Type.String;
+        base.ValueChanged += value => ValueChanged?.Invoke(value.As<string>());
     }
 
-    /// <param name="displayName">Name that is displayed in the settings UI</param>
-    /// <param name="defaultValue">Default string value of the setting</param>
-    /// <param name="possibleValues">Possible string values for the setting. Used to populate a dropdown UI</param>
-    public SettingString(string displayName, string defaultValue, string[] possibleValues)
-        : base(displayName, defaultValue)
-    {
-        PossibleValues = possibleValues;
-    }
-
-    /// <param name="displayName">Name that is displayed in the settings UI</param>
-    /// <param name="defaultIndex">List index of the default string value</param>
-    /// <param name="possibleValues">Possible string values for the setting. Used to populate a dropdown UI</param>
-    public SettingString(string displayName, int defaultIndex, string[] possibleValues)
-        : base(displayName, possibleValues[defaultIndex])
-    {
-        PossibleValues = possibleValues;
-    }
-
-    /// <summary>
-    /// Subscribes a callback to value changes of the setting
-    /// </summary>
-    /// <param name="function">Action that is ran when the value of the setting changes</param>
-    public void Subscribe(Action<string> function) =>
-        Subscribe(new Action<Variant>(v => function((string)v)));
+    public new event Action<string> ValueChanged;
 }
 
 /// <summary>
@@ -229,7 +101,7 @@ public partial class Settings : Node
 {
     public const string UserSettingsResourcePath = "user://settings.tres";
 
-    private List<PropertyInfo> properties;
+    private List<PropertyInfo> settingProperties;
     private DictionaryResource defaultResource;
     private DictionaryResource resource;
 
@@ -237,21 +109,8 @@ public partial class Settings : Node
     {
         Name = "Settings";
 
-        // Save defined properties to variables
-        properties = GetSettingProperties();
-
-        // Loop through keybinds and their properties to set categories for them
-        // based on declared attributes
-        var settings = GetSettings();
-        CreateCategoryAttribute latestCategoryAttribute = null;
-        foreach (var (setting, index) in settings.WithIndex())
-        {
-            var attribute = properties[index].GetCustomAttribute(typeof(CreateCategoryAttribute));
-            if (attribute != null)
-                latestCategoryAttribute = (CreateCategoryAttribute)attribute;
-            if (latestCategoryAttribute != null)
-                setting.SetCategory(latestCategoryAttribute.DisplayName);
-        }
+        // Save defined properties to list
+        settingProperties = GetSettingProperties();
 
         // Create a default settings resource by running resource creation function
         // using settings with default values before they get overwritten by initialization
@@ -267,7 +126,6 @@ public partial class Settings : Node
             GD.Print("User settings not found, using default values");
             resource = defaultResource;
         }
-        Save();
     }
 
     /// <summary>
@@ -276,24 +134,27 @@ public partial class Settings : Node
     /// <returns></returns>
     internal static List<PropertyInfo> GetSettingProperties()
     {
-        IEnumerable<PropertyInfo> list =
-            from property in typeof(Settings).GetProperties()
-            where typeof(SettingBase).IsAssignableFrom(property.PropertyType)
-            select property;
+        List<PropertyInfo> list = new();
+        foreach (var property in typeof(Settings).GetProperties())
+        {
+            if (typeof(VariantSetting).IsAssignableFrom(property.PropertyType))
+                list.Add(property);
+        }
 
-        return list.ToList();
+        return list;
     }
 
     /// <summary>
-    /// Returns a list of defined settings
+    /// Returns a dictionary of defined settings, with the keys being their names
     /// </summary>
-    public List<SettingBase> GetSettings()
+    public Dictionary<string, VariantSetting> GetSettings()
     {
-        List<SettingBase> list = properties
-            .Select(property => (SettingBase)property.GetValue(this))
-            .ToList();
-
-        return list.ToList();
+        Dictionary<string, VariantSetting> settings = new();
+        foreach (var property in settingProperties)
+        {
+            settings.Add(property.Name, (VariantSetting)property.GetValue(this));
+        }
+        return settings;
     }
 
     /// <summary>
@@ -304,9 +165,9 @@ public partial class Settings : Node
         DictionaryResource newResource = new();
 
         // Loop through settings and create a dictionary entry for each of them
-        foreach (var setting in GetSettings())
+        foreach (var (settingName, setting) in GetSettings())
         {
-            newResource.Dictionary.Add(setting.DisplayName, setting.Value);
+            newResource.Dictionary.Add(settingName, (Variant)setting.Value);
         }
         return newResource;
     }
@@ -318,11 +179,11 @@ public partial class Settings : Node
     {
         // Loop through settings and set value of setting
         // if definition name is found in resource dictionary
-        foreach (var setting in GetSettings())
+        foreach (var (settingName, setting) in GetSettings())
         {
-            if (resourceToLoad.Dictionary.ContainsKey(setting.DisplayName))
+            if (resourceToLoad.Dictionary.ContainsKey(settingName))
             {
-                setting.Value = resourceToLoad.Dictionary[setting.DisplayName];
+                setting.Value = resourceToLoad.Dictionary[settingName];
             }
         }
         Defluo.Print("Loaded settings from resource");
