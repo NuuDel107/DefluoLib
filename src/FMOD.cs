@@ -439,4 +439,13 @@ public partial class FMODHandler : Node
     /// </summary>
     /// <param name="bankFilePath">File path in the project that leads to the .bank file that should be loaded</param>
     public FMODBankInstance GetBank(FMODBank bankAsset) => new(bankAsset.FilePath);
+
+    /// <summary>
+    /// Shuts down the FMOD engine. Cannot be
+    /// If the FMOD addon's automatic shutdown has been disabled, this should be called manually when quitting the game
+    /// </summary>
+    public void Shutdown()
+    {
+        GDScriptNode.Call("shutdown");
+    }
 }

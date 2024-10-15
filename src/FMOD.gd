@@ -2,6 +2,9 @@ extends Node
 
 var studio_system = FMODStudioModule.get_studio_system()
 
+func shutdown():
+	FMODStudioModule.shutdown()
+
 # Banks
 
 func load_bank(bank_path: String):
@@ -33,7 +36,7 @@ func update_instance_3d(instance: EventInstance, position: Vector3):
 	var attributes = FMOD_3D_ATTRIBUTES.new()
 	RuntimeUtils.to_3d_attributes(attributes, position)
 	instance.set_3d_attributes(attributes)
-	
+
 func start_instance(instance: EventInstance):
 	instance.start()
 
@@ -56,7 +59,7 @@ func add_instance_callback(instance: EventInstance, callable: Callable, callback
 
 func get_bus(bus_path: String):
 	return studio_system.get_bus(bus_path)
-	
+
 func set_bus_volume(bus: Bus, volume: float):
 	bus.set_volume(volume)
 
@@ -81,6 +84,6 @@ func set_instance_label_parameter(instance: EventInstance, parameter_name: Strin
 
 func set_global_float_parameter(parameter_name: String, value: float):
 	studio_system.set_parameter_by_name(parameter_name, value)
-	
+
 func set_global_label_parameter(parameter_name: String, value: String):
 	studio_system.set_parameter_by_name_with_label(parameter_name, value)
