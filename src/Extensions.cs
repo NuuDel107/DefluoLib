@@ -49,4 +49,16 @@ public static class Extensions
         }
         return null;
     }
+
+    public static List<Node> GetDescendants(this Node self)
+    {
+        List<Node> nodes = new();
+        foreach (var child in self.GetChildren())
+        {
+            nodes.Add(child);
+            if (child.GetChildCount() > 0)
+                nodes.AddRange(child.GetDescendants());
+        }
+        return nodes;
+    }
 }
