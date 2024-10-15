@@ -27,10 +27,22 @@ public class Mouse
     /// </summary>
     /// <param name="pos">Current position of mouse in viewport</param>
     /// <param name="relativePos">Position of mouse in relation to the last frame</param>
-    internal void Update(InputEventMouseMotion mouseMotionEvent)
+    internal void UpdatePosition(InputEventMouseMotion mouseMotionEvent)
     {
         Moved?.Invoke(mouseMotionEvent);
         Position = mouseMotionEvent.Position;
+    }
+
+    /// <summary>
+    /// Invokes pressed and released events according to input event
+    /// </summary>
+    /// <param name="mouseButtonEvent"></param>
+    internal void UpdateButton(InputEventMouseButton mouseButtonEvent)
+    {
+        if (mouseButtonEvent.Pressed)
+            Pressed.Invoke(mouseButtonEvent.ButtonIndex);
+        else
+            Released.Invoke(mouseButtonEvent.ButtonIndex);
     }
 
     /// <summary>
@@ -43,6 +55,16 @@ public class Mouse
     /// Fired when mouse is moved
     /// </summary>
     public event Action<InputEventMouseMotion> Moved;
+
+    /// <summary>
+    /// Fired when mouse button is pressed down
+    /// </summary>
+    public event Action<MouseButton> Pressed;
+
+    /// <summary>
+    /// Fired when mouse button is released
+    /// </summary>
+    public event Action<MouseButton> Released;
 }
 
 /// <summary>
@@ -251,12 +273,15 @@ public partial class Input : Node
 
         if (@event is InputEventMouseMotion mouseMotionEvent)
         {
-            if (!Disabled)
-                // Update mouse class with the position and relative position vectors
-                Mouse.Update(mouseMotionEvent);
+            // Update mouse class with the position and relative position vectors
+            Mouse.UpdatePosition(mouseMotionEvent);
         }
         else
         {
+            // Invoke mouse events when pressing mouse button
+            if (@event is InputEventMouseButton mouseButtonEvent)
+                Mouse.UpdateButton(mouseButtonEvent);
+
             // Loop through keybinds
             foreach (var keybind in keybinds)
             {

@@ -177,7 +177,9 @@ public class DigitalInput
         Type == DigitalInputType.JoyAxis && (JoyAxis)EnumValue == joyAxis;
 
     public bool Equals(JoyAxis joyAxis, bool positiveAnalog) =>
-        Type == DigitalInputType.JoyAxis && (JoyAxis)EnumValue == joyAxis && positiveAnalog == PositiveAnalog;
+        Type == DigitalInputType.JoyAxis
+        && (JoyAxis)EnumValue == joyAxis
+        && positiveAnalog == PositiveAnalog;
 
     public bool Equals(DigitalInput input)
     {
@@ -203,24 +205,19 @@ public class DigitalInput
     public bool? ParseValue(InputEvent @event, float axisThreshold = Keybind.DefaultAxisThreshold)
     {
         if (
-          @event is InputEventKey keyEvent
-          // If physical keycode is empty, check for equality using the regular keycode instead
-          && Equals(keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode)
+            @event is InputEventKey keyEvent
+            // If physical keycode is empty, check for equality using the regular keycode instead
+            && Equals(
+                keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode
+            )
         )
             return keyEvent.Pressed;
-
         else if (
-            @event is InputEventMouseButton mouseButtonEvent
-            && Equals(mouseButtonEvent.ButtonIndex)
+            @event is InputEventMouseButton mouseButtonEvent && Equals(mouseButtonEvent.ButtonIndex)
         )
             return mouseButtonEvent.Pressed;
-
-        else if (
-            @event is InputEventJoypadButton joypadEvent
-            && Equals(joypadEvent.ButtonIndex)
-        )
+        else if (@event is InputEventJoypadButton joypadEvent && Equals(joypadEvent.ButtonIndex))
             return joypadEvent.Pressed;
-
         else if (
             @event is InputEventJoypadMotion joypadMotionEvent
             && Equals(joypadMotionEvent.Axis, joypadMotionEvent.AxisValue > 0)
@@ -233,7 +230,6 @@ public class DigitalInput
             else
                 return null;
         }
-
         else
             return null;
     }
