@@ -183,6 +183,58 @@ public partial class Input : Node
         );
 
     /// <summary>
+    /// Global UI navigation action for moving left.
+    /// </summary>
+    /// <value></value>
+    public Keybind UILeft { get; set; } =
+        new Keybind(
+            "UI Left",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Left,
+            ControllerDigitalInput.DPadLeft,
+            ControllerDigitalInput.LeftStickLeft
+        );
+
+    /// <summary>
+    /// Global UI navigation action for moving right.
+    /// </summary>
+    /// <value></value>
+    public Keybind UIRight { get; set; } =
+        new Keybind(
+            "UI Right",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Right,
+            ControllerDigitalInput.DPadRight,
+            ControllerDigitalInput.LeftStickRight
+        );
+
+    /// <summary>
+    /// Global UI navigation action for moving up.
+    /// </summary>
+    /// <value></value>
+    public Keybind UIUp { get; set; } =
+        new Keybind(
+            "UI Up",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Up,
+            ControllerDigitalInput.DPadUp,
+            ControllerDigitalInput.LeftStickUp
+        );
+
+    /// <summary>
+    /// Global UI navigation action for moving down.
+    /// </summary>
+    /// <value></value>
+    public Keybind UIDown { get; set; } =
+        new Keybind(
+            "UI Down",
+            new KeybindOptions(isEssential: true, canBeRebinded: false),
+            KeyboardInput.Down,
+            ControllerDigitalInput.DPadDown,
+            ControllerDigitalInput.LeftStickDown
+        );
+
+    /// <summary>
     /// Stores the previously stored pressed states of joy axis inputs.
     /// This is required to properly send pressed and released signals.
     /// </summary>
