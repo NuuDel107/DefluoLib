@@ -550,7 +550,7 @@ public partial class Input : Node
         if (Disabled)
             return Vector2.Zero;
 
-        return new Vector2(GetAnalogValue(x), GetAnalogValue(y)).Normalized();
+        return new Vector2(GetAnalogValue(x), GetAnalogValue(y));
     }
 
     private void ActivateKeybind(Keybind keybind, bool isPressed)
