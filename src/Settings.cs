@@ -2,12 +2,11 @@ using Godot;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DefluoLib;
 
 /// <summary>
-/// A setting value representing a variant.
+/// A setting value representing some Variant.
 /// </summary>
 public class VariantSetting
 {
@@ -45,6 +44,12 @@ public class BoolSetting : VariantSetting
         base.ValueChanged += value => ValueChanged?.Invoke(value.As<bool>());
     }
 
+    public new bool Value
+    {
+        get => (bool)base.Value;
+        set => base.Value = value;
+    }
+
     public new event Action<bool> ValueChanged;
 }
 
@@ -58,6 +63,12 @@ public class FloatSetting : VariantSetting
     {
         Type = Variant.Type.Float;
         base.ValueChanged += value => ValueChanged?.Invoke(value.As<float>());
+    }
+
+    public new float Value
+    {
+        get => (float)base.Value;
+        set => base.Value = value;
     }
 
     public new event Action<float> ValueChanged;
@@ -76,6 +87,12 @@ public class EnumSetting<T> : VariantSetting
         base.ValueChanged += value => ValueChanged?.Invoke(value.As<T>());
     }
 
+    public new T Value
+    {
+        get => (T)(object)base.Value;
+        set => base.Value = (Variant)(object)value;
+    }
+
     public new event Action<T> ValueChanged;
 }
 
@@ -89,6 +106,12 @@ public class StringSetting : VariantSetting
     {
         Type = Variant.Type.String;
         base.ValueChanged += value => ValueChanged?.Invoke(value.As<string>());
+    }
+
+    public new string Value
+    {
+        get => (string)base.Value;
+        set => base.Value = value;
     }
 
     public new event Action<string> ValueChanged;
