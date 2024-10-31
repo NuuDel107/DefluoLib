@@ -4,7 +4,8 @@ using Godot.Collections;
 namespace DefluoLib;
 
 /// <summary>
-/// FMOD event asset that event instances can be created and played from
+/// FMOD event asset that event instances can be created and played from.
+/// Can also represent a snapshot.
 /// </summary>
 [Tool]
 [GlobalClass]
@@ -49,14 +50,16 @@ public partial class FMODEvent : FMODAsset
     /// Plays event once and releases the event instance afterwards
     /// </summary>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void Play(params (string Name, Variant Value)[] parameters) => Defluo.FMOD.PlayEvent(this, parameters);
+    public void Play(params (string Name, Variant Value)[] parameters) =>
+        Defluo.FMOD.PlayEvent(this, parameters);
 
     /// <summary>
     /// Plays event once attached to a 3D node and releases the event instance afterwards
     /// </summary>
     /// <param name="attachedNode">3D node that is attached to the event</param>
     /// <param name="parameters">Event parameters that will be set before playing event instance</param>
-    public void Play(Node3D attachedNode, params (string Name, Variant Value)[] parameters) => Defluo.FMOD.PlayEvent(this, attachedNode, parameters);
+    public void Play(Node3D attachedNode, params (string Name, Variant Value)[] parameters) =>
+        Defluo.FMOD.PlayEvent(this, attachedNode, parameters);
 
     /// <summary>
     /// Creates a new event instance

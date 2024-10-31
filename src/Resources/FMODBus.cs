@@ -17,6 +17,10 @@ public partial class FMODBus : FMODAsset
     }
 
     private FMODBusInstance _bus;
+
+    /// <summary>
+    /// The bus instance created from this bus asset
+    /// </summary>
     public FMODBusInstance Bus
     {
         get

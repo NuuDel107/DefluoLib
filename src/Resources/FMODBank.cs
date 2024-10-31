@@ -17,6 +17,10 @@ public partial class FMODBank : FMODAsset
     }
 
     private FMODBankInstance _bank;
+
+    /// <summary>
+    /// The bank instance created from this bank asset
+    /// </summary>
     public FMODBankInstance Bank
     {
         get
@@ -28,6 +32,7 @@ public partial class FMODBank : FMODAsset
             return _bank;
         }
     }
+
     /// <summary>
     /// File path of the bank within the project file structure
     /// </summary>
