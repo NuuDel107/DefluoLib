@@ -1,67 +1,97 @@
 using Godot;
-using Godot.Collections;
+using FMOD.Studio;
 
 namespace DefluoLib;
 
-/// <summary>
-/// FMOD bank asset that can be instantiated and loaded into memory
-/// </summary>
 [Tool]
 [GlobalClass]
-public partial class FMODBank : FMODAsset
+public partial class FMODBank : Resource
 {
-    public Resource BankAsset
-    {
-        get { return Asset; }
-        set { Asset = value; }
-    }
+    [Export(PropertyHint.File, "*.bank")]
+    public string FilePath { get; set; }
 
-    private FMODBankInstance _bank;
-
-    /// <summary>
-    /// The bank instance created from this bank asset
-    /// </summary>
-    public FMODBankInstance Bank
+    private string path;
+    public string Path
     {
-        get
+        get => path;
+        set
         {
-            if (_bank == null && Defluo.FMOD.IsNodeReady())
-            {
-                _bank = Defluo.FMOD.GetBank(this);
-            }
-            return _bank;
+            path = value;
+            if (Defluo.FMOD.IsStudioSystemInitialized)
+                Init();
+            else
+                Defluo.FMOD.StudioSystemInitialized += Init;
         }
     }
 
-    /// <summary>
-    /// File path of the bank within the project file structure
-    /// </summary>
-    public string FilePath
+    public Bank Bank;
+
+    public bool IsLoaded;
+
+    public FMODBank(string path, bool isLoaded = false)
     {
-        get { return (string)BankAsset.Get("file_path"); }
+        IsLoaded = isLoaded;
+        if (IsLoaded)
+            Path = path;
+        else
+            FilePath = path;
     }
 
-    /// <summary>
-    /// Time when bank was last built in Unix time
-    /// </summary>
-    public long ModifiedTime
+    public FMODBank() { }
+
+    protected void Init()
     {
-        get { return (long)BankAsset.Get("modified_time"); }
+        if (!IsLoaded)
+            return;
+
+        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBank(FilePath, out Bank)))
+            throw new System.ArgumentException($"Invalid loaded bank path {FilePath}");
     }
 
-    public override Array<Dictionary> _GetPropertyList()
+    public void Load(LOAD_BANK_FLAGS loadFlags = LOAD_BANK_FLAGS.NORMAL)
     {
-        var properties = new Array<Dictionary>
+        if (IsLoaded)
+            throw new System.Exception($"Bank {FilePath} is already loaded");
+
+        if (
+            !FMODCaller.CheckResult(
+                Defluo.FMOD.StudioSystem.loadBankFile(
+                    ProjectSettings.GlobalizePath(FilePath),
+                    loadFlags,
+                    out Bank
+                )
+            )
+        )
         {
-            new()
-            {
-                { "name", "BankAsset" },
-                { "type", (int)Variant.Type.Object },
-                { "usage", (int)PropertyUsageFlags.Default },
-                { "hint", (int)PropertyHint.ResourceType },
-                { "hint_string", "BankAsset" }
-            }
-        };
-        return properties;
+            throw new System.ArgumentException($"Invalid bank file path {FilePath}");
+        }
+        IsLoaded = true;
+        Bank.getPath(out path);
+    }
+
+    public void Unload()
+    {
+        if (!IsLoaded)
+            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+
+        FMODCaller.CheckResult(Bank.unload());
+        IsLoaded = false;
+        Bank = new Bank(0);
+    }
+
+    public void LoadSampleData()
+    {
+        if (!IsLoaded)
+            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+
+        FMODCaller.CheckResult(Bank.loadSampleData());
+    }
+
+    public void UnloadSampleData()
+    {
+        if (!IsLoaded)
+            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+
+        FMODCaller.CheckResult(Bank.unloadSampleData());
     }
 }

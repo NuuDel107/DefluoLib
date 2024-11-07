@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqxkc56md4gfm"]
+
+[ext_resource type="Texture2D" uid="uid://b7mmcodnfrmq5" path="res://addons/DefluoLib/img/FMOD/event_icon.svg" id="1_kbo3j"]
+
+[node name="FMODEditorProperty" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "
+
+"
+icon = ExtResource("1_kbo3j")
+
+[node name="Popup" type="Popup" parent="."]
+initial_position = 4
+size = Vector2i(400, 600)
+borderless = false
+
+[node name="Panel" type="Panel" parent="Popup"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="Tree" type="Tree" parent="Popup/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+allow_reselect = true
+hide_root = true

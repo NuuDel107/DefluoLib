@@ -1,4 +1,5 @@
 using Godot;
+using System.Runtime.InteropServices;
 
 namespace DefluoLib;
 
@@ -43,6 +44,15 @@ public partial class Defluo : Node
     public static FMODHandler FMOD
     {
         get { return Singleton.GetNode<FMODHandler>("FMOD"); }
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    static extern bool SetDllDirectory(string lpPathName);
+
+    public Defluo()
+    {
+        // Set the default directory for importing DLLs
+        SetDllDirectory(ProjectSettings.GlobalizePath("res://addons/DefluoLib/bin"));
     }
 
     public override void _EnterTree()

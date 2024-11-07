@@ -1,67 +1,60 @@
 using Godot;
-using Godot.Collections;
+using FMOD.Studio;
 
 namespace DefluoLib;
 
-/// <summary>
-/// FMOD bus asset that can be used to control bus properties
-/// </summary>
 [Tool]
 [GlobalClass]
-public partial class FMODBus : FMODAsset
+public partial class FMODBus : FMODResource
 {
-    public Resource BusAsset
+    public Bus Bus;
+
+    public FMODBus(string path)
+        : base(path) { }
+
+    public FMODBus()
+        : base() { }
+
+    protected override void Init()
     {
-        get { return Asset; }
-        set { Asset = value; }
+        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBus(Path, out Bus)))
+            throw new System.ArgumentException($"Invalid bus path {Path}");
     }
 
-    private FMODBusInstance _bus;
-
-    /// <summary>
-    /// The bus instance created from this bus asset
-    /// </summary>
-    public FMODBusInstance Bus
+    public bool Paused
     {
         get
         {
-            if (_bus == null && Defluo.FMOD.IsNodeReady())
-            {
-                _bus = Defluo.FMOD.GetBus(this);
-            }
-            return _bus;
+            FMODCaller.CheckResult(Bus.getPaused(out var paused));
+            return paused;
         }
+        set => FMODCaller.CheckResult(Bus.setPaused(value));
     }
 
-    public override Array<Dictionary> _GetPropertyList()
+    public bool Muted
     {
-        var properties = new Array<Dictionary>
+        get
         {
-            new()
-            {
-                { "name", "BusAsset" },
-                { "type", (int)Variant.Type.Object },
-                { "usage", (int)PropertyUsageFlags.Default },
-                { "hint", (int)PropertyHint.ResourceType },
-                { "hint_string", "BusAsset" }
-            }
-        };
-        return properties;
+            FMODCaller.CheckResult(Bus.getMute(out var muted));
+            return muted;
+        }
+        set => FMODCaller.CheckResult(Bus.setMute(value));
     }
 
-    /// <summary>
-    /// Sets volume of bus
-    /// </summary>
-    public void SetVolume(float volume)
+    public float Volume
     {
-        Bus.SetVolume(volume);
+        get
+        {
+            FMODCaller.CheckResult(Bus.getVolume(out var volume));
+            return volume;
+        }
+        set => FMODCaller.CheckResult(Bus.setVolume(value));
     }
 
-    /// <summary>
-    /// Pauses or unpauses bus
-    /// </summary>
-    public void SetPaused(bool paused)
+    public void StopEvents(bool allowFadeout)
     {
-        Bus.SetPaused(paused);
+        FMODCaller.CheckResult(
+            Bus.stopAllEvents(allowFadeout ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE)
+        );
     }
 }

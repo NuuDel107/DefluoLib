@@ -35,6 +35,22 @@ public static class Extensions
         self.Select(value => (float)Math.Round((double)value, digits));
 
     /// <summary>
+    /// Converts <c>Vector3</c> to a struct used in FMOD API calls
+    /// </summary>
+    public static FMOD.VECTOR ToFMOD(this Vector3 self) =>
+        new FMOD.VECTOR() with
+        {
+            x = -self.X,
+            y = self.Y,
+            z = self.Z
+        };
+
+    /// <summary>
+    /// Converts FMOD Core API's <c>VECTOR</c> struct to Godot's <c>Vector3</c>
+    /// </summary>
+    public static Vector3 ToGodot(this FMOD.VECTOR self) => new Vector3(-self.x, self.y, self.z);
+
+    /// <summary>
     /// Returns the first instance of a child node of given type
     /// </summary>
     /// <typeparam name="T">Wanted type of child node</typeparam>

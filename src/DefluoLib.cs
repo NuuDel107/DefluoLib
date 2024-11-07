@@ -7,9 +7,29 @@ namespace DefluoLib;
 [Tool]
 internal partial class DefluoLib : EditorPlugin
 {
+    /// <summary>
+    /// Returns the scene tree of the currently running scene.
+    /// </summary>
+    /// <returns></returns>
+    public static SceneTree GetSceneTree() => (SceneTree)Engine.GetMainLoop();
+
+    public static DefluoLib Singleton =>
+        GetSceneTree().Root.GetChild(0).GetNode<DefluoLib>("DefluoLib");
+
+    private FMODInspectorPlugin inspectorPlugin;
+
+    public FMODLister FMODLister;
+
+    public DefluoLib() { }
+
     public override void _EnterTree()
     {
+        Name = "DefluoLib";
         AddAutoloadSingleton("Defluo", "res://addons/DefluoLib/src/Defluo.cs");
+
+        inspectorPlugin = new();
+        AddInspectorPlugin(inspectorPlugin);
+
         AddProjectSetting(
             "DefluoLib/Input/KeyboardIconFolder",
             "res://addons/DefluoLib/img/kenney_input/Keyboard",
@@ -34,8 +54,26 @@ internal partial class DefluoLib : EditorPlugin
             Variant.Type.String,
             PropertyHint.Dir
         );
+
         AddProjectSetting("DefluoLib/Input/InputLogging", false, Variant.Type.Bool);
         AddProjectSetting("DefluoLib/Input/EventLogging", false, Variant.Type.Bool);
+
+        AddProjectSetting(
+            "DefluoLib/FMOD/BankFolder",
+            "res://",
+            Variant.Type.String,
+            PropertyHint.Dir
+        );
+
+        AddProjectSetting(
+            "DefluoLib/FMOD/BanksToLoadOnStartup",
+            new Array(),
+            Variant.Type.Array,
+            PropertyHint.TypeString,
+            $"{Variant.Type.String:D}/{PropertyHint.File:D}:*.bank"
+        );
+
+        FMODLister = new();
     }
 
     public static void AddProjectSetting(
@@ -60,6 +98,10 @@ internal partial class DefluoLib : EditorPlugin
         ProjectSettings.Save();
     }
 
-    public override void _ExitTree() { }
+    public override void _ExitTree()
+    {
+        RemoveInspectorPlugin(inspectorPlugin);
+        FMODLister.StudioSystem.release();
+    }
 }
 #endif

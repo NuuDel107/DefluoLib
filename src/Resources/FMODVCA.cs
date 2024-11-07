@@ -1,55 +1,33 @@
 using Godot;
-using Godot.Collections;
+using FMOD.Studio;
 
 namespace DefluoLib;
 
-/// <summary>
-/// FMOD VCA asset that can be used to control VCA properties
-/// </summary>
 [Tool]
 [GlobalClass]
-public partial class FMODVCA : FMODAsset
+public partial class FMODVCA : FMODResource
 {
-    public Resource VCAAsset
+    public VCA VCA;
+
+    public FMODVCA(string path)
+        : base(path) { }
+
+    public FMODVCA()
+        : base() { }
+
+    protected override void Init()
     {
-        get { return Asset; }
-        set { Asset = value; }
+        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getVCA(Path, out VCA)))
+            throw new System.ArgumentException($"Invalid VCA path {Path}");
     }
 
-    private FMODVCAInstance _VCA;
-    public FMODVCAInstance VCA
+    public float Volume
     {
         get
         {
-            if (_VCA == null && Defluo.FMOD.IsNodeReady())
-            {
-                _VCA = Defluo.FMOD.GetVCA(this);
-            }
-            return _VCA;
+            FMODCaller.CheckResult(VCA.getVolume(out var volume));
+            return volume;
         }
-    }
-
-    public override Array<Dictionary> _GetPropertyList()
-    {
-        var properties = new Array<Dictionary>
-        {
-            new()
-            {
-                { "name", "VCAAsset" },
-                { "type", (int)Variant.Type.Object },
-                { "usage", (int)PropertyUsageFlags.Default },
-                { "hint", (int)PropertyHint.ResourceType },
-                { "hint_string", "VCAAsset" }
-            }
-        };
-        return properties;
-    }
-
-    /// <summary>
-    /// Sets volume of VCA
-    /// </summary>
-    public void SetVolume(float volume)
-    {
-        VCA.SetVolume(volume);
+        set => FMODCaller.CheckResult(VCA.setVolume(value));
     }
 }
