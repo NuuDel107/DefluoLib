@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://o0emk62ce8ak"
-path="res://.godot/imported/icon_fmod.png-c265bc8e25b3c78a4ecdb3df8ccf721d.ctex"
+uid="uid://dicy1vg4e0q0"
+path="res://.godot/imported/folder_opened.png-731dfa0fa78dbb6487c752520409a895.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/DefluoLib/img/FMOD/icon_fmod.png"
-dest_files=["res://.godot/imported/icon_fmod.png-c265bc8e25b3c78a4ecdb3df8ccf721d.ctex"]
+source_file="res://addons/DefluoLib/img/FMOD/folder_opened.png"
+dest_files=["res://.godot/imported/folder_opened.png-731dfa0fa78dbb6487c752520409a895.ctex"]
 
 [params]
 

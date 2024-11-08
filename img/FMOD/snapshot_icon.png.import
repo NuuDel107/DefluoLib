@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdh8nmiofpk1q"
-path="res://.godot/imported/folder_closed.svg-c0372eaa02a2e90090bbe60545b7fab0.ctex"
+uid="uid://cd30q74swxhuy"
+path="res://.godot/imported/snapshot_icon.png-c3d7674ffa6147a12cdcdd502a478d3e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/DefluoLib/img/FMOD/folder_closed.svg"
-dest_files=["res://.godot/imported/folder_closed.svg-c0372eaa02a2e90090bbe60545b7fab0.ctex"]
+source_file="res://addons/DefluoLib/img/FMOD/snapshot_icon.png"
+dest_files=["res://.godot/imported/snapshot_icon.png-c3d7674ffa6147a12cdcdd502a478d3e.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=0
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

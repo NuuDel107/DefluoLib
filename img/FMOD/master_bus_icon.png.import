@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7mmcodnfrmq5"
-path="res://.godot/imported/event_icon.svg-44c63b2272bc00178df6957a4c879e58.ctex"
+uid="uid://cuar7duwg8d5x"
+path="res://.godot/imported/master_bus_icon.png-1b9ed3a619bb14fb0f2edf063d35735a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/DefluoLib/img/FMOD/event_icon.svg"
-dest_files=["res://.godot/imported/event_icon.svg-44c63b2272bc00178df6957a4c879e58.ctex"]
+source_file="res://addons/DefluoLib/img/FMOD/master_bus_icon.png"
+dest_files=["res://.godot/imported/master_bus_icon.png-1b9ed3a619bb14fb0f2edf063d35735a.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=0
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

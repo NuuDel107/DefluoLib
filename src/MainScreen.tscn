@@ -1,14 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://c033kgodxfe3i"]
+[gd_scene load_steps=6 format=3 uid="uid://c033kgodxfe3i"]
 
 [ext_resource type="Script" path="res://addons/DefluoLib/src/MainScreen.cs" id="1_dvmt4"]
-[ext_resource type="Texture2D" uid="uid://o0emk62ce8ak" path="res://addons/DefluoLib/img/FMOD/icon_fmod.png" id="2_vuepx"]
+[ext_resource type="Texture2D" path="res://addons/DefluoLib/img/FMOD/icon_fmod.png" id="2_vuepx"]
 [ext_resource type="Texture2D" uid="uid://cwfw1jtki8ojk" path="res://addons/DefluoLib/img/Reload.svg" id="3_a1f4p"]
-[ext_resource type="Texture2D" uid="uid://b7mmcodnfrmq5" path="res://addons/DefluoLib/img/FMOD/event_icon.svg" id="3_nk85l"]
-[ext_resource type="Texture2D" uid="uid://b34j3suyun68j" path="res://addons/DefluoLib/img/FMOD/bus_icon.svg" id="4_th4vk"]
-[ext_resource type="Texture2D" uid="uid://p2p28fyre5g0" path="res://addons/DefluoLib/img/FMOD/vca_icon.svg" id="5_6s72y"]
-[ext_resource type="Texture2D" uid="uid://b7uqqwhl7huj7" path="res://addons/DefluoLib/img/FMOD/c_parameter_icon.svg" id="6_hky0p"]
+[ext_resource type="Texture2D" uid="uid://c6h687mftuf4w" path="res://addons/DefluoLib/img/Play.svg" id="4_bw5mb"]
+[ext_resource type="Texture2D" uid="uid://cfbsrj65br2s1" path="res://addons/DefluoLib/img/Stop.svg" id="5_tfy0b"]
 
-[node name="MainScreen" type="Control" node_paths=PackedStringArray("TabContainer", "FMODTabContainer", "EventTree", "BusTree", "VCATree", "ParameterTree", "RefreshFMODButton")]
+[node name="MainScreen" type="Control" node_paths=PackedStringArray("TabContainer", "RefreshFMODButton", "FMODTree", "EventPlaybackContainer", "EventPlayButton")]
 custom_minimum_size = Vector2(800, 400)
 layout_mode = 3
 anchors_preset = 0
@@ -16,14 +14,13 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_dvmt4")
 MainTabIcons = Array[Texture2D]([ExtResource("2_vuepx")])
-FMODTabIcons = Array[Texture2D]([ExtResource("3_nk85l"), ExtResource("4_th4vk"), ExtResource("5_6s72y"), ExtResource("6_hky0p")])
 TabContainer = NodePath("TabContainer")
-FMODTabContainer = NodePath("TabContainer/FMOD/FMODTabContainer")
-EventTree = NodePath("TabContainer/FMOD/FMODTabContainer/Events")
-BusTree = NodePath("TabContainer/FMOD/FMODTabContainer/Buses")
-VCATree = NodePath("TabContainer/FMOD/FMODTabContainer/VCAs")
-ParameterTree = NodePath("TabContainer/FMOD/FMODTabContainer/Parameters")
-RefreshFMODButton = NodePath("TabContainer/FMOD/RefreshButton")
+RefreshFMODButton = NodePath("TabContainer/FMOD/VBoxContainer/RefreshButton")
+FMODTree = NodePath("TabContainer/FMOD/Tree")
+EventPlaybackContainer = NodePath("TabContainer/FMOD/VBoxContainer/EventPlayback")
+EventPlayButton = NodePath("TabContainer/FMOD/VBoxContainer/EventPlayback/HBoxContainer/PlayButton")
+PlayIcon = ExtResource("4_bw5mb")
+StopIcon = ExtResource("5_tfy0b")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 1
@@ -42,39 +39,39 @@ layout_mode = 2
 theme_override_constants/separation = 15
 metadata/_tab_index = 0
 
-[node name="FMODTabContainer" type="TabContainer" parent="TabContainer/FMOD"]
+[node name="Tree" type="Tree" parent="TabContainer/FMOD"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
-tab_alignment = 1
-current_tab = 0
-
-[node name="Events" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
-layout_mode = 2
+theme_override_constants/icon_max_width = 27
+theme_override_font_sizes/font_size = 16
 hide_root = true
-metadata/_tab_index = 0
 
-[node name="Buses" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
-visible = false
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/FMOD"]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
-hide_root = true
-metadata/_tab_index = 1
 
-[node name="VCAs" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
-visible = false
-layout_mode = 2
-hide_root = true
-metadata/_tab_index = 2
-
-[node name="Parameters" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
-visible = false
-layout_mode = 2
-hide_root = true
-metadata/_tab_index = 3
-
-[node name="RefreshButton" type="Button" parent="TabContainer/FMOD"]
+[node name="RefreshButton" type="Button" parent="TabContainer/FMOD/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
 text = "Refresh Banks"
 icon = ExtResource("3_a1f4p")
+
+[node name="EventPlayback" type="CenterContainer" parent="TabContainer/FMOD/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/FMOD/VBoxContainer/EventPlayback"]
+layout_mode = 2
+size_flags_vertical = 10
+alignment = 1
+
+[node name="Label" type="Label" parent="TabContainer/FMOD/VBoxContainer/EventPlayback/HBoxContainer"]
+layout_mode = 2
+text = "Play Event  "
+
+[node name="PlayButton" type="Button" parent="TabContainer/FMOD/VBoxContainer/EventPlayback/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("4_bw5mb")

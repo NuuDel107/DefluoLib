@@ -1,7 +1,51 @@
 using Godot;
+using FMOD.Studio;
 using System.Collections.Generic;
 
 namespace DefluoLib;
+
+public static class FMODIcons
+{
+    public static Texture2D EventIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/event_icon.png"
+    );
+    public static Texture2D FolderClosedIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/folder_closed.png"
+    );
+    public static Texture2D FolderOpenedIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/folder_opened.png"
+    );
+    public static Texture2D GroupBusIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/group_bus_icon.png"
+    );
+    public static Texture2D ReturnBusIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/return_bus_icon.png"
+    );
+    public static Texture2D MasterBusIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/master_bus_icon.png"
+    );
+    public static Texture2D VCAIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/vca_icon.png"
+    );
+    public static Texture2D ContinuousParameterIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/c_parameter_icon.png"
+    );
+    public static Texture2D DiscreteParameterIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/d_parameter_icon.png"
+    );
+    public static Texture2D LabeledParameterIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/l_parameter_icon.png"
+    );
+    public static Texture2D BankIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/bank_icon.png"
+    );
+    public static Texture2D SnapshotIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/snapshot_icon.png"
+    );
+    public static Texture2D LogoIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/fmod_icon.svg"
+    );
+}
 
 [Tool]
 public partial class FMODEditorProperty : EditorProperty, ISerializationListener
@@ -24,25 +68,6 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
 
     public FMODResource currentResource;
     public string currentResourceName;
-
-    private static Texture2D eventIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/event_icon.svg"
-    );
-    private static Texture2D folderClosedIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/folder_closed.svg"
-    );
-    private static Texture2D folderOpenedIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/folder_opened.svg"
-    );
-    private static Texture2D busIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/bus_icon.svg"
-    );
-    private static Texture2D VCAIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/vca_icon.svg"
-    );
-    private static Texture2D parameterIcon = GD.Load<Texture2D>(
-        "res://addons/DefluoLib/img/FMOD/c_parameter_icon.svg"
-    );
 
     public void OnBeforeSerialize()
     {
@@ -95,23 +120,23 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         switch (hintString)
         {
             case "FMODEvent":
-                Button.Icon = eventIcon;
+                Button.Icon = FMODIcons.EventIcon;
                 Tree.ItemSelected += EventOnSelected;
                 Tree.ItemCollapsed += EventOnCollapsed;
                 break;
 
             case "FMODBus":
-                Button.Icon = busIcon;
+                Button.Icon = FMODIcons.ReturnBusIcon;
                 Tree.ItemSelected += BusOnSelected;
                 break;
 
             case "FMODVCA":
-                Button.Icon = VCAIcon;
+                Button.Icon = FMODIcons.VCAIcon;
                 Tree.ItemSelected += VCAOnSelected;
                 break;
 
             case "FMODParameter":
-                Button.Icon = parameterIcon;
+                Button.Icon = FMODIcons.ContinuousParameterIcon;
                 Tree.ItemSelected += ParameterOnSelected;
                 break;
         }
@@ -150,6 +175,12 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
 
             case "FMODBus":
                 Button.Text = Popup.Title = "Select Bus";
+                Button.Icon = FMODIcons.ReturnBusIcon;
+                if (currentResource is FMODBus bus)
+                {
+                    if (bus.Path == "bus:/")
+                        Button.Icon = FMODIcons.MasterBusIcon;
+                }
                 InitBusTree(Tree);
                 break;
 
@@ -192,7 +223,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     var eventItem = tree.CreateItem(folderItem);
                     eventItem.SetText(0, pathSteps[i]);
                     eventItem.SetTooltipText(0, eventPath);
-                    eventItem.SetIcon(0, eventIcon);
+                    eventItem.SetIcon(0, FMODIcons.EventIcon);
                 }
                 else
                 {
@@ -203,7 +234,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     {
                         folderItem = tree.CreateItem(folderItem);
                         folderItem.SetText(0, pathSteps[i]);
-                        folderItem.SetIcon(0, folderClosedIcon);
+                        folderItem.SetIcon(0, FMODIcons.FolderClosedIcon);
                         folderItem.Collapsed = true;
                         folderItem.SetSelectable(0, false);
                         folders.Add(folderPath, folderItem);
@@ -228,9 +259,9 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
     private void EventOnCollapsed(TreeItem item)
     {
         if (item.Collapsed)
-            item.SetIcon(0, folderClosedIcon);
+            item.SetIcon(0, FMODIcons.FolderClosedIcon);
         else
-            item.SetIcon(0, folderOpenedIcon);
+            item.SetIcon(0, FMODIcons.FolderOpenedIcon);
     }
 
     public static void InitBusTree(Tree tree)
@@ -241,7 +272,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         var masterBus = tree.CreateItem(root);
         masterBus.SetText(0, "Master");
         masterBus.SetTooltipText(0, "bus:/");
-        masterBus.SetIcon(0, busIcon);
+        masterBus.SetIcon(0, FMODIcons.MasterBusIcon);
         masterBus.Collapsed = false;
         buses.Add("bus:/", masterBus);
 
@@ -260,7 +291,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     var bus = tree.CreateItem(parent);
                     bus.SetText(0, pathSteps[i]);
                     bus.SetTooltipText(0, busPath);
-                    bus.SetIcon(0, busIcon);
+                    bus.SetIcon(0, FMODIcons.ReturnBusIcon);
                 }
                 else
                 {
@@ -272,7 +303,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     parent = tree.CreateItem(parent);
                     parent.SetText(0, pathSteps[i]);
                     parent.SetTooltipText(0, parentPath);
-                    parent.SetIcon(0, busIcon);
+                    parent.SetIcon(0, FMODIcons.GroupBusIcon);
                     parent.Collapsed = true;
                     buses.Add(busPath, parent);
 
@@ -289,6 +320,11 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
 
         if (path == "")
             return;
+
+        if (path == "bus:/")
+            Button.Icon = FMODIcons.MasterBusIcon;
+        else
+            Button.Icon = FMODIcons.ReturnBusIcon;
 
         Popup.Visible = false;
         Button.Text = item.GetText(0);
@@ -315,7 +351,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     var VCA = tree.CreateItem(parent);
                     VCA.SetText(0, pathSteps[i]);
                     VCA.SetTooltipText(0, VCAPath);
-                    VCA.SetIcon(0, VCAIcon);
+                    VCA.SetIcon(0, FMODIcons.VCAIcon);
                 }
                 else
                 {
@@ -327,7 +363,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     parent = tree.CreateItem(parent);
                     parent.SetText(0, pathSteps[i]);
                     parent.SetTooltipText(0, parentPath);
-                    parent.SetIcon(0, VCAIcon);
+                    parent.SetIcon(0, FMODIcons.VCAIcon);
                     parent.Collapsed = true;
                     vcas.Add(VCAPath, parent);
 
@@ -358,7 +394,20 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
             var param = tree.CreateItem(root);
             param.SetText(0, parameterPath.Split("/")[^1]);
             param.SetTooltipText(0, parameterPath);
-            param.SetIcon(0, parameterIcon);
+
+            DefluoLib.Singleton.FMODLister.StudioSystem.getParameterDescriptionByName(
+                parameterPath,
+                out var paramDesc
+            );
+
+            GD.Print(paramDesc.flags);
+
+            if (paramDesc.flags.HasFlag(PARAMETER_FLAGS.LABELED))
+                param.SetIcon(0, FMODIcons.LabeledParameterIcon);
+            else if (paramDesc.flags.HasFlag(PARAMETER_FLAGS.DISCRETE))
+                param.SetIcon(0, FMODIcons.DiscreteParameterIcon);
+            else
+                param.SetIcon(0, FMODIcons.ContinuousParameterIcon);
         }
     }
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0ay1s4wp0ume"
-path="res://.godot/imported/l_parameter_icon.svg-d8d8b22f71f33a3bf82090ce5bdb1e72.ctex"
+uid="uid://cfbsrj65br2s1"
+path="res://.godot/imported/Stop.svg-270a385c7442baadfe78946c73538f8a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/DefluoLib/img/FMOD/l_parameter_icon.svg"
-dest_files=["res://.godot/imported/l_parameter_icon.svg-d8d8b22f71f33a3bf82090ce5bdb1e72.ctex"]
+source_file="res://addons/DefluoLib/img/Stop.svg"
+dest_files=["res://.godot/imported/Stop.svg-270a385c7442baadfe78946c73538f8a.ctex"]
 
 [params]
 

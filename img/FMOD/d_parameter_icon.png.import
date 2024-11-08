@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b0pcfe8hkgn5r"
-path="res://.godot/imported/bank_icon.svg-d6bc4c34120f3153d50dedb40f7e5ecf.ctex"
+uid="uid://cfwngr3pw2mrh"
+path="res://.godot/imported/d_parameter_icon.png-d50a018045952b2e6cb625402ad7fa4c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/DefluoLib/img/FMOD/bank_icon.svg"
-dest_files=["res://.godot/imported/bank_icon.svg-d6bc4c34120f3153d50dedb40f7e5ecf.ctex"]
+source_file="res://addons/DefluoLib/img/FMOD/d_parameter_icon.png"
+dest_files=["res://.godot/imported/d_parameter_icon.png-d50a018045952b2e6cb625402ad7fa4c.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=0
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

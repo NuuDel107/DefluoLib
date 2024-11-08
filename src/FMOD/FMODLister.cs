@@ -7,6 +7,7 @@ using Godot;
 using FMOD;
 using FMOD.Studio;
 using System.Collections.Generic;
+using System.IO;
 
 public class FMODLister
 {
@@ -19,6 +20,7 @@ public class FMODLister
     public List<string> BusPaths = new();
     public List<string> VCAPaths = new();
     public List<string> ParameterPaths = new();
+    public List<Bank> Banks = new();
 
     public FMODLister()
     {
@@ -39,14 +41,28 @@ public class FMODLister
 
     private void List()
     {
-        // Load the master strings bank from the bank folder specified in settings
-        var masterStringsPath = ProjectSettings.GlobalizePath(
+        var bankFolder = ProjectSettings.GlobalizePath(
             ProjectSettings.GetSetting("DefluoLib/FMOD/BankFolder").As<string>()
-                + "/Master.strings.bank"
         );
+
+        // Load the master strings bank from the bank folder specified in settings
+        var masterStringsPath = bankFolder + "/Master.strings.bank";
         FMODCaller.CheckResult(
             StudioSystem.loadBankFile(masterStringsPath, LOAD_BANK_FLAGS.NORMAL, out var stringBank)
         );
+
+        // Load all other bank files in bank folder
+        var bankFiles = Directory.GetFiles(bankFolder, "*.bank");
+        foreach (var bankFile in bankFiles)
+        {
+            if (bankFile == Path.Combine(bankFolder, "Master.strings.bank"))
+                continue;
+
+            FMODCaller.CheckResult(
+                StudioSystem.loadBankFile(bankFile, LOAD_BANK_FLAGS.NORMAL, out var bank)
+            );
+            Banks.Add(bank);
+        }
 
         // Loop through all resource paths in bank and add them to lists
         // where they can be used by the editor properties
@@ -83,6 +99,7 @@ public class FMODLister
         BusPaths.Clear();
         VCAPaths.Clear();
         ParameterPaths.Clear();
+        Banks.Clear();
         List();
         Refreshed?.Invoke();
     }
