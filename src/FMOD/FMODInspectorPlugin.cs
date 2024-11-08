@@ -23,6 +23,8 @@ public partial class FMODInspectorPlugin : EditorInspectorPlugin
         bool wide
     )
     {
+        // If the property class name starts with FMOD,
+        // it's (hopefully) an exported FMODResource
         if (hintString.Length > 4 && hintString.Substring(0, 4) == "FMOD")
         {
             AddPropertyEditor(name, new FMODEditorProperty(hintString));

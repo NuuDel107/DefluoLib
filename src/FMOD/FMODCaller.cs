@@ -1,7 +1,5 @@
 using Godot;
 using FMOD;
-using System;
-using FMOD.Studio;
 
 namespace DefluoLib;
 

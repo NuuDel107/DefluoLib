@@ -25,6 +25,7 @@ public class FMODLister
         // Set the default directory for importing DLLs
         SetDllDirectory(ProjectSettings.GlobalizePath("res://addons/DefluoLib/bin"));
 
+        // Initialize studio system
         FMOD.Studio.System.create(out StudioSystem);
         StudioSystem.initialize(
             512,
@@ -33,12 +34,17 @@ public class FMODLister
             (IntPtr)0
         );
 
+        // Load the master strings bank from the bank folder specified in settings
         var masterStringsPath = ProjectSettings.GlobalizePath(
             ProjectSettings.GetSetting("DefluoLib/FMOD/BankFolder").As<string>()
                 + "/Master.strings.bank"
         );
-        StudioSystem.loadBankFile(masterStringsPath, LOAD_BANK_FLAGS.NORMAL, out var stringBank);
+        FMODCaller.CheckResult(
+            StudioSystem.loadBankFile(masterStringsPath, LOAD_BANK_FLAGS.NORMAL, out var stringBank)
+        );
 
+        // Loop through all resource paths in bank and add them to lists
+        // where they can be used by the editor properties
         stringBank.getStringCount(out var count);
         for (int i = 0; i < count; i++)
         {

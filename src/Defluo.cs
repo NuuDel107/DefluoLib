@@ -39,7 +39,7 @@ public partial class Defluo : Node
     }
 
     /// <summary>
-    /// Handler for interfacing with the FMOD Godot integration
+    /// Node that maintains the FMOD Studio System. Main access point for the FMOD integration
     /// </summary>
     public static FMODHandler FMOD
     {

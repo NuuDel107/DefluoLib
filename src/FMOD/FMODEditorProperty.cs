@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DefluoLib;
 
 [Tool]
-public partial class FMODEditorProperty : EditorProperty
+public partial class FMODEditorProperty : EditorProperty, ISerializationListener
 {
     private const string scenePath = "res://addons/DefluoLib/src/FMOD/FMODEditorProperty.tscn";
 
@@ -40,7 +40,40 @@ public partial class FMODEditorProperty : EditorProperty
         "res://addons/DefluoLib/img/FMOD/c_parameter_icon.svg"
     );
 
-    // Called when the node enters the scene tree for the first time.
+    public void OnBeforeSerialize()
+    {
+        // Disconnect all event handlers when reloading assemblies
+        Button.Pressed -= OnButtonPress;
+
+        switch (hintString)
+        {
+            case "FMODEvent":
+                Tree.ItemSelected -= EventOnSelected;
+                Tree.ItemCollapsed -= EventOnCollapsed;
+                break;
+
+            case "FMODBus":
+                Tree.ItemSelected -= BusOnSelected;
+                break;
+
+            case "FMODVCA":
+                Tree.ItemSelected -= VCAOnSelected;
+                break;
+
+            case "FMODParameter":
+                Tree.ItemSelected -= ParameterOnSelected;
+                break;
+        }
+        // Remove UI scene, it will be reinstantiated after reload
+        RemoveChild(UIScene);
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Reinitialize editor property after reloading
+        _Ready();
+    }
+
     public override void _Ready()
     {
         UIScene = GD.Load<PackedScene>(scenePath).Instantiate<Control>();
@@ -51,94 +84,54 @@ public partial class FMODEditorProperty : EditorProperty
         Tree = Popup.GetNode<Tree>("Panel/Tree");
 
         Popup.Visible = false;
-        Button.Pressed += () =>
-        {
-            Popup.Visible = !Popup.Visible;
-        };
+        Button.Pressed += OnButtonPress;
 
+        // Run initialization based on resource type
         switch (hintString)
         {
             case "FMODEvent":
                 Button.Icon = eventIcon;
-                Tree.ItemSelected += () =>
-                {
-                    var item = Tree.GetSelected();
-                    var path = item.GetTooltipText(0);
-                    if (path == "")
-                        return;
-
-                    Popup.Visible = false;
-                    Button.Text = item.GetText(0);
-                    EmitChanged(GetEditedProperty(), new FMODEvent(path));
-                };
-
-                Tree.ItemCollapsed += item =>
-                {
-                    if (item.Collapsed)
-                        item.SetIcon(0, folderClosedIcon);
-                    else
-                        item.SetIcon(0, folderOpenedIcon);
-                };
+                Tree.ItemSelected += EventOnSelected;
+                Tree.ItemCollapsed += EventOnCollapsed;
                 break;
 
             case "FMODBus":
                 Button.Icon = busIcon;
-                Tree.ItemSelected += () =>
-                {
-                    var item = Tree.GetSelected();
-                    var path = item.GetTooltipText(0);
-
-                    if (path == "")
-                        return;
-
-                    Popup.Visible = false;
-                    Button.Text = item.GetText(0);
-                    EmitChanged(GetEditedProperty(), new FMODBus(path));
-                };
+                Tree.ItemSelected += BusOnSelected;
                 break;
 
             case "FMODVCA":
                 Button.Icon = VCAIcon;
-                Tree.ItemSelected += () =>
-                {
-                    var item = Tree.GetSelected();
-                    var path = item.GetTooltipText(0);
-                    if (path == "")
-                        return;
-
-                    Popup.Visible = false;
-                    Button.Text = item.GetText(0);
-                    EmitChanged(GetEditedProperty(), new FMODVCA(path));
-                };
+                Tree.ItemSelected += VCAOnSelected;
                 break;
 
             case "FMODParameter":
                 Button.Icon = parameterIcon;
-                Tree.ItemSelected += () =>
-                {
-                    var item = Tree.GetSelected();
-                    var path = item.GetTooltipText(0);
-                    if (path == "")
-                        return;
-
-                    Popup.Visible = false;
-                    Button.Text = item.GetText(0);
-                    EmitChanged(GetEditedProperty(), new FMODParameter(path));
-                };
+                Tree.ItemSelected += ParameterOnSelected;
                 break;
         }
+    }
+
+    private void OnButtonPress()
+    {
+        Popup.Visible = !Popup.Visible;
     }
 
     public void RefreshData()
     {
         currentResource = (FMODResource)GetEditedObject().Get(GetEditedProperty());
+
+        // If no resource has been created, the name is empty
         if (currentResource == null)
             currentResourceName = "";
+        // The resource path bus:/ refers to the Master bus
         else if (currentResource.Path == "bus:/")
             currentResourceName = "Master";
+        // Otherwise get the last part of the path which should be the resource name
         else
             currentResourceName = currentResource.Path.Split("/")[^1];
 
+        // Clear possible TreeItems before initialization
         Tree.Clear();
 
         switch (hintString)
@@ -164,6 +157,9 @@ public partial class FMODEditorProperty : EditorProperty
                 break;
         }
 
+        // If resource doesn't exist,
+        // the button text should be the one initialized based on the resource type
+        // Otherwise use the resource's name
         if (currentResourceName != "")
             Button.Text = currentResourceName;
     }
@@ -210,6 +206,26 @@ public partial class FMODEditorProperty : EditorProperty
                 }
             }
         }
+    }
+
+    private void EventOnSelected()
+    {
+        var item = Tree.GetSelected();
+        var path = item.GetTooltipText(0);
+        if (path == "")
+            return;
+
+        Popup.Visible = false;
+        Button.Text = item.GetText(0);
+        EmitChanged(GetEditedProperty(), new FMODEvent(path));
+    }
+
+    private void EventOnCollapsed(TreeItem item)
+    {
+        if (item.Collapsed)
+            item.SetIcon(0, folderClosedIcon);
+        else
+            item.SetIcon(0, folderOpenedIcon);
     }
 
     private void InitBusTree()
@@ -263,6 +279,19 @@ public partial class FMODEditorProperty : EditorProperty
         }
     }
 
+    private void BusOnSelected()
+    {
+        var item = Tree.GetSelected();
+        var path = item.GetTooltipText(0);
+
+        if (path == "")
+            return;
+
+        Popup.Visible = false;
+        Button.Text = item.GetText(0);
+        EmitChanged(GetEditedProperty(), new FMODBus(path));
+    }
+
     private void InitVCATree()
     {
         Popup.Title = "Select VCA";
@@ -307,6 +336,18 @@ public partial class FMODEditorProperty : EditorProperty
         }
     }
 
+    private void VCAOnSelected()
+    {
+        var item = Tree.GetSelected();
+        var path = item.GetTooltipText(0);
+        if (path == "")
+            return;
+
+        Popup.Visible = false;
+        Button.Text = item.GetText(0);
+        EmitChanged(GetEditedProperty(), new FMODVCA(path));
+    }
+
     private void InitParameterTree()
     {
         Popup.Title = "Select Parameter";
@@ -320,5 +361,17 @@ public partial class FMODEditorProperty : EditorProperty
             param.SetTooltipText(0, parameterPath);
             param.SetIcon(0, parameterIcon);
         }
+    }
+
+    private void ParameterOnSelected()
+    {
+        var item = Tree.GetSelected();
+        var path = item.GetTooltipText(0);
+        if (path == "")
+            return;
+
+        Popup.Visible = false;
+        Button.Text = item.GetText(0);
+        EmitChanged(GetEditedProperty(), new FMODParameter(path));
     }
 }

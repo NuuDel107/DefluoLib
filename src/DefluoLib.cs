@@ -5,7 +5,7 @@ using Godot.Collections;
 namespace DefluoLib;
 
 [Tool]
-internal partial class DefluoLib : EditorPlugin
+internal partial class DefluoLib : EditorPlugin, ISerializationListener
 {
     /// <summary>
     /// Returns the scene tree of the currently running scene.
@@ -21,6 +21,19 @@ internal partial class DefluoLib : EditorPlugin
     public FMODLister FMODLister;
 
     public DefluoLib() { }
+
+    public void OnBeforeSerialize()
+    {
+        // Release the studio system when reloading assemblies
+        // It will be reinitialized afterwards
+        FMODLister.StudioSystem.release();
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Reinitialize plugin state after reloading
+        _EnterTree();
+    }
 
     public override void _EnterTree()
     {
