@@ -25,18 +25,22 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
     public FMODResource currentResource;
     public string currentResourceName;
 
-    private Texture2D eventIcon = GD.Load<Texture2D>(
+    private static Texture2D eventIcon = GD.Load<Texture2D>(
         "res://addons/DefluoLib/img/FMOD/event_icon.svg"
     );
-    private Texture2D folderClosedIcon = GD.Load<Texture2D>(
+    private static Texture2D folderClosedIcon = GD.Load<Texture2D>(
         "res://addons/DefluoLib/img/FMOD/folder_closed.svg"
     );
-    private Texture2D folderOpenedIcon = GD.Load<Texture2D>(
+    private static Texture2D folderOpenedIcon = GD.Load<Texture2D>(
         "res://addons/DefluoLib/img/FMOD/folder_opened.svg"
     );
-    private Texture2D busIcon = GD.Load<Texture2D>("res://addons/DefluoLib/img/FMOD/bus_icon.svg");
-    private Texture2D VCAIcon = GD.Load<Texture2D>("res://addons/DefluoLib/img/FMOD/vca_icon.svg");
-    private Texture2D parameterIcon = GD.Load<Texture2D>(
+    private static Texture2D busIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/bus_icon.svg"
+    );
+    private static Texture2D VCAIcon = GD.Load<Texture2D>(
+        "res://addons/DefluoLib/img/FMOD/vca_icon.svg"
+    );
+    private static Texture2D parameterIcon = GD.Load<Texture2D>(
         "res://addons/DefluoLib/img/FMOD/c_parameter_icon.svg"
     );
 
@@ -44,6 +48,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
     {
         // Disconnect all event handlers when reloading assemblies
         Button.Pressed -= OnButtonPress;
+        DefluoLib.Singleton.FMODLister.Refreshed -= RefreshData;
 
         switch (hintString)
         {
@@ -110,6 +115,8 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                 Tree.ItemSelected += ParameterOnSelected;
                 break;
         }
+
+        DefluoLib.Singleton.FMODLister.Refreshed += RefreshData;
     }
 
     private void OnButtonPress()
@@ -137,23 +144,23 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         switch (hintString)
         {
             case "FMODEvent":
-                Button.Text = "Select Event";
-                InitEventTree();
+                Button.Text = Popup.Title = "Select Event";
+                InitEventTree(Tree);
                 break;
 
             case "FMODBus":
-                Button.Text = "Select Bus";
-                InitBusTree();
+                Button.Text = Popup.Title = "Select Bus";
+                InitBusTree(Tree);
                 break;
 
             case "FMODVCA":
-                Button.Text = "Select VCA";
-                InitVCATree();
+                Button.Text = Popup.Title = "Select VCA";
+                InitVCATree(Tree);
                 break;
 
             case "FMODParameter":
-                Button.Text = "Select Parameter";
-                InitParameterTree();
+                Button.Text = Popup.Title = "Select Parameter";
+                InitParameterTree(Tree);
                 break;
         }
 
@@ -169,11 +176,9 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         RefreshData();
     }
 
-    private void InitEventTree()
+    public static void InitEventTree(Tree tree)
     {
-        Popup.Title = "Select Event";
-
-        var root = Tree.CreateItem();
+        var root = tree.CreateItem();
         var folders = new Dictionary<string, TreeItem>();
         foreach (var eventPath in DefluoLib.Singleton.FMODLister.EventPaths)
         {
@@ -184,7 +189,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
             {
                 if (i == pathSteps.Length - 1)
                 {
-                    var eventItem = Tree.CreateItem(folderItem);
+                    var eventItem = tree.CreateItem(folderItem);
                     eventItem.SetText(0, pathSteps[i]);
                     eventItem.SetTooltipText(0, eventPath);
                     eventItem.SetIcon(0, eventIcon);
@@ -196,7 +201,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                         folderItem = folders[folderPath];
                     else
                     {
-                        folderItem = Tree.CreateItem(folderItem);
+                        folderItem = tree.CreateItem(folderItem);
                         folderItem.SetText(0, pathSteps[i]);
                         folderItem.SetIcon(0, folderClosedIcon);
                         folderItem.Collapsed = true;
@@ -228,14 +233,12 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
             item.SetIcon(0, folderOpenedIcon);
     }
 
-    private void InitBusTree()
+    public static void InitBusTree(Tree tree)
     {
-        Popup.Title = "Select Bus";
-
-        var root = Tree.CreateItem();
+        var root = tree.CreateItem();
         var buses = new Dictionary<string, TreeItem>();
 
-        var masterBus = Tree.CreateItem(root);
+        var masterBus = tree.CreateItem(root);
         masterBus.SetText(0, "Master");
         masterBus.SetTooltipText(0, "bus:/");
         masterBus.SetIcon(0, busIcon);
@@ -254,7 +257,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
             {
                 if (i == pathSteps.Length - 1)
                 {
-                    var bus = Tree.CreateItem(parent);
+                    var bus = tree.CreateItem(parent);
                     bus.SetText(0, pathSteps[i]);
                     bus.SetTooltipText(0, busPath);
                     bus.SetIcon(0, busIcon);
@@ -266,7 +269,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     if (buses.ContainsKey(parentPath))
                         continue;
 
-                    parent = Tree.CreateItem(parent);
+                    parent = tree.CreateItem(parent);
                     parent.SetText(0, pathSteps[i]);
                     parent.SetTooltipText(0, parentPath);
                     parent.SetIcon(0, busIcon);
@@ -292,11 +295,9 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         EmitChanged(GetEditedProperty(), new FMODBus(path));
     }
 
-    private void InitVCATree()
+    public static void InitVCATree(Tree tree)
     {
-        Popup.Title = "Select VCA";
-
-        var root = Tree.CreateItem();
+        var root = tree.CreateItem();
         var vcas = new Dictionary<string, TreeItem>();
 
         foreach (var VCAPath in DefluoLib.Singleton.FMODLister.VCAPaths)
@@ -311,7 +312,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
             {
                 if (i == pathSteps.Length - 1)
                 {
-                    var VCA = Tree.CreateItem(parent);
+                    var VCA = tree.CreateItem(parent);
                     VCA.SetText(0, pathSteps[i]);
                     VCA.SetTooltipText(0, VCAPath);
                     VCA.SetIcon(0, VCAIcon);
@@ -323,7 +324,7 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
                     if (vcas.ContainsKey(parentPath))
                         continue;
 
-                    parent = Tree.CreateItem(parent);
+                    parent = tree.CreateItem(parent);
                     parent.SetText(0, pathSteps[i]);
                     parent.SetTooltipText(0, parentPath);
                     parent.SetIcon(0, VCAIcon);
@@ -348,15 +349,13 @@ public partial class FMODEditorProperty : EditorProperty, ISerializationListener
         EmitChanged(GetEditedProperty(), new FMODVCA(path));
     }
 
-    private void InitParameterTree()
+    public static void InitParameterTree(Tree tree)
     {
-        Popup.Title = "Select Parameter";
-
-        var root = Tree.CreateItem();
+        var root = tree.CreateItem();
 
         foreach (var parameterPath in DefluoLib.Singleton.FMODLister.ParameterPaths)
         {
-            var param = Tree.CreateItem(root);
+            var param = tree.CreateItem(root);
             param.SetText(0, parameterPath.Split("/")[^1]);
             param.SetTooltipText(0, parameterPath);
             param.SetIcon(0, parameterIcon);

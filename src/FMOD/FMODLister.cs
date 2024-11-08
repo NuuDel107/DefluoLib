@@ -34,6 +34,11 @@ public class FMODLister
             (IntPtr)0
         );
 
+        List();
+    }
+
+    private void List()
+    {
         // Load the master strings bank from the bank folder specified in settings
         var masterStringsPath = ProjectSettings.GlobalizePath(
             ProjectSettings.GetSetting("DefluoLib/FMOD/BankFolder").As<string>()
@@ -67,5 +72,18 @@ public class FMODLister
                     break;
             }
         }
+    }
+
+    public event Action Refreshed;
+
+    public void Refresh()
+    {
+        FMODCaller.CheckResult(StudioSystem.unloadAll());
+        EventPaths.Clear();
+        BusPaths.Clear();
+        VCAPaths.Clear();
+        ParameterPaths.Clear();
+        List();
+        Refreshed?.Invoke();
     }
 }

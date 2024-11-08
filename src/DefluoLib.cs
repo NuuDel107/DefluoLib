@@ -7,6 +7,8 @@ namespace DefluoLib;
 [Tool]
 internal partial class DefluoLib : EditorPlugin, ISerializationListener
 {
+    private const string mainScreenScenePath = "res://addons/DefluoLib/src/MainScreen.tscn";
+
     /// <summary>
     /// Returns the scene tree of the currently running scene.
     /// </summary>
@@ -17,6 +19,7 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
         GetSceneTree().Root.GetChild(0).GetNode<DefluoLib>("DefluoLib");
 
     private FMODInspectorPlugin inspectorPlugin;
+    private MainScreen mainScreen;
 
     public FMODLister FMODLister;
 
@@ -27,6 +30,8 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
         // Release the studio system when reloading assemblies
         // It will be reinitialized afterwards
         FMODLister.StudioSystem.release();
+        // Remove main screen before reinitialization
+        mainScreen?.QueueFree();
     }
 
     public void OnAfterDeserialize()
@@ -39,6 +44,14 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
     {
         Name = "DefluoLib";
         AddAutoloadSingleton("Defluo", "res://addons/DefluoLib/src/Defluo.cs");
+
+        FMODLister = new();
+
+        mainScreen = ResourceLoader
+            .Load<PackedScene>(mainScreenScenePath)
+            .Instantiate<MainScreen>();
+        EditorInterface.Singleton.GetEditorMainScreen().AddChild(mainScreen);
+        _MakeVisible(false);
 
         inspectorPlugin = new();
         AddInspectorPlugin(inspectorPlugin);
@@ -85,8 +98,22 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
             PropertyHint.TypeString,
             $"{Variant.Type.String:D}/{PropertyHint.File:D}:*.bank"
         );
+    }
 
-        FMODLister = new();
+    public override bool _HasMainScreen() => true;
+
+    public override string _GetPluginName() => "DefluoLib";
+
+    private Texture2D mainScreenLogo = ResourceLoader.Load<Texture2D>(
+        "res://addons/DefluoLib/img/DefluoLib.svg"
+    );
+
+    public override Texture2D _GetPluginIcon() => mainScreenLogo;
+
+    public override void _MakeVisible(bool visible)
+    {
+        if (mainScreen != null)
+            mainScreen.Visible = visible;
     }
 
     public static void AddProjectSetting(
@@ -113,8 +140,9 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
 
     public override void _ExitTree()
     {
-        RemoveInspectorPlugin(inspectorPlugin);
         FMODLister.StudioSystem.release();
+        RemoveInspectorPlugin(inspectorPlugin);
+        mainScreen?.QueueFree();
     }
 }
 #endif

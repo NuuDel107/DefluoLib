@@ -1,0 +1,80 @@
+[gd_scene load_steps=8 format=3 uid="uid://c033kgodxfe3i"]
+
+[ext_resource type="Script" path="res://addons/DefluoLib/src/MainScreen.cs" id="1_dvmt4"]
+[ext_resource type="Texture2D" uid="uid://o0emk62ce8ak" path="res://addons/DefluoLib/img/FMOD/icon_fmod.png" id="2_vuepx"]
+[ext_resource type="Texture2D" uid="uid://cwfw1jtki8ojk" path="res://addons/DefluoLib/img/Reload.svg" id="3_a1f4p"]
+[ext_resource type="Texture2D" uid="uid://b7mmcodnfrmq5" path="res://addons/DefluoLib/img/FMOD/event_icon.svg" id="3_nk85l"]
+[ext_resource type="Texture2D" uid="uid://b34j3suyun68j" path="res://addons/DefluoLib/img/FMOD/bus_icon.svg" id="4_th4vk"]
+[ext_resource type="Texture2D" uid="uid://p2p28fyre5g0" path="res://addons/DefluoLib/img/FMOD/vca_icon.svg" id="5_6s72y"]
+[ext_resource type="Texture2D" uid="uid://b7uqqwhl7huj7" path="res://addons/DefluoLib/img/FMOD/c_parameter_icon.svg" id="6_hky0p"]
+
+[node name="MainScreen" type="Control" node_paths=PackedStringArray("TabContainer", "FMODTabContainer", "EventTree", "BusTree", "VCATree", "ParameterTree", "RefreshFMODButton")]
+custom_minimum_size = Vector2(800, 400)
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_dvmt4")
+MainTabIcons = Array[Texture2D]([ExtResource("2_vuepx")])
+FMODTabIcons = Array[Texture2D]([ExtResource("3_nk85l"), ExtResource("4_th4vk"), ExtResource("5_6s72y"), ExtResource("6_hky0p")])
+TabContainer = NodePath("TabContainer")
+FMODTabContainer = NodePath("TabContainer/FMOD/FMODTabContainer")
+EventTree = NodePath("TabContainer/FMOD/FMODTabContainer/Events")
+BusTree = NodePath("TabContainer/FMOD/FMODTabContainer/Buses")
+VCATree = NodePath("TabContainer/FMOD/FMODTabContainer/VCAs")
+ParameterTree = NodePath("TabContainer/FMOD/FMODTabContainer/Parameters")
+RefreshFMODButton = NodePath("TabContainer/FMOD/RefreshButton")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/icon_max_width = 32
+theme_override_font_sizes/font_size = 26
+tab_alignment = 1
+current_tab = 0
+
+[node name="FMOD" type="HBoxContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+metadata/_tab_index = 0
+
+[node name="FMODTabContainer" type="TabContainer" parent="TabContainer/FMOD"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tab_alignment = 1
+current_tab = 0
+
+[node name="Events" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
+layout_mode = 2
+hide_root = true
+metadata/_tab_index = 0
+
+[node name="Buses" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
+visible = false
+layout_mode = 2
+hide_root = true
+metadata/_tab_index = 1
+
+[node name="VCAs" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
+visible = false
+layout_mode = 2
+hide_root = true
+metadata/_tab_index = 2
+
+[node name="Parameters" type="Tree" parent="TabContainer/FMOD/FMODTabContainer"]
+visible = false
+layout_mode = 2
+hide_root = true
+metadata/_tab_index = 3
+
+[node name="RefreshButton" type="Button" parent="TabContainer/FMOD"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+text = "Refresh Banks"
+icon = ExtResource("3_a1f4p")
