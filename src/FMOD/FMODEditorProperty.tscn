@@ -1,6 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://dqxkc56md4gfm"]
-
-[ext_resource type="Texture2D" uid="uid://b7mmcodnfrmq5" path="res://addons/DefluoLib/img/FMOD/event_icon.svg" id="1_kbo3j"]
+[gd_scene format=3 uid="uid://dqxkc56md4gfm"]
 
 [node name="FMODEditorProperty" type="Control"]
 layout_mode = 3
@@ -16,7 +14,6 @@ grow_vertical = 2
 text = "
 
 "
-icon = ExtResource("1_kbo3j")
 
 [node name="Popup" type="Popup" parent="."]
 initial_position = 4

@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://c033kgodxfe3i"]
 
 [ext_resource type="Script" path="res://addons/DefluoLib/src/MainScreen.cs" id="1_dvmt4"]
-[ext_resource type="Texture2D" path="res://addons/DefluoLib/img/FMOD/icon_fmod.png" id="2_vuepx"]
+[ext_resource type="Texture2D" uid="uid://cqx34bbic2j3a" path="res://addons/DefluoLib/img/FMOD/fmod_icon.svg" id="2_vuepx"]
 [ext_resource type="Texture2D" uid="uid://cwfw1jtki8ojk" path="res://addons/DefluoLib/img/Reload.svg" id="3_a1f4p"]
 [ext_resource type="Texture2D" uid="uid://c6h687mftuf4w" path="res://addons/DefluoLib/img/Play.svg" id="4_bw5mb"]
 [ext_resource type="Texture2D" uid="uid://cfbsrj65br2s1" path="res://addons/DefluoLib/img/Stop.svg" id="5_tfy0b"]
