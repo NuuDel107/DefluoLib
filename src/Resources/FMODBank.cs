@@ -3,6 +3,10 @@ using FMOD.Studio;
 
 namespace DefluoLib;
 
+/// <summary>
+/// A <see href="https://www.fmod.com/docs/2.03/studio/getting-events-into-your-game.html#banks">Bank</see> resource.
+/// Can be exported from a node to set the path to the bank file in the editor.
+/// </summary>
 [Tool]
 [GlobalClass]
 public partial class FMODBank : Resource
@@ -24,8 +28,14 @@ public partial class FMODBank : Resource
         }
     }
 
+    /// <summary>
+    /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-bank.html">Bank</see> object.
+    /// </summary>
     public Bank Bank;
 
+    /// <summary>
+    /// If bank is loaded into the studio system.
+    /// </summary>
     public bool IsLoaded;
 
     public FMODBank(string path, bool isLoaded = false)
@@ -48,6 +58,10 @@ public partial class FMODBank : Resource
             throw new System.ArgumentException($"Invalid loaded bank path {FilePath}");
     }
 
+    /// <summary>
+    /// Loads the bank into the studio system.
+    /// </summary>
+    /// <param name="loadFlags"></param>
     public void Load(LOAD_BANK_FLAGS loadFlags = LOAD_BANK_FLAGS.NORMAL)
     {
         if (IsLoaded)
@@ -69,6 +83,9 @@ public partial class FMODBank : Resource
         Bank.getPath(out path);
     }
 
+    /// <summary>
+    /// Unloads the bank from the studio system.
+    /// </summary>
     public void Unload()
     {
         if (!IsLoaded)
@@ -79,6 +96,9 @@ public partial class FMODBank : Resource
         Bank = new Bank(0);
     }
 
+    /// <summary>
+    /// Loads all of the sample data (sound assets) contained in the bank into memory.
+    /// </summary>
     public void LoadSampleData()
     {
         if (!IsLoaded)
@@ -87,6 +107,9 @@ public partial class FMODBank : Resource
         FMODCaller.CheckResult(Bank.loadSampleData());
     }
 
+    /// <summary>
+    /// Unloads the bank's sample data.
+    /// </summary>
     public void UnloadSampleData()
     {
         if (!IsLoaded)

@@ -8,6 +8,9 @@ public abstract partial class FMODResource : Resource
 {
     private string path;
 
+    /// <summary>
+    /// The local path of an FMOD resource.
+    /// </summary>
     [Export]
     public string Path
     {

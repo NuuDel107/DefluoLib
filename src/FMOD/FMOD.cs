@@ -11,20 +11,53 @@ namespace DefluoLib;
 /// </summary>
 public partial class FMODHandler : Node
 {
+    /// <summary>
+    /// Main <see href="https://www.fmod.com/docs/2.03/api/studio-api-system.html">Studio System</see> that is initialized at startup.
+    /// </summary>
+
     public FMOD.Studio.System StudioSystem;
     public Node3D Listener;
     private Vector3? listenerLastPosition = null;
 
+    /// <summary>
+    /// Updates the studio system. <see href="https://www.fmod.com/docs/2.03/api/studio-guide.html#studio-system-processing">See here for more info</see>
+    /// </summary>
     public void UpdateStudioSystem() => FMODCaller.CheckResult(StudioSystem.update());
 
+    /// <summary>
+    /// Fired once at startup when studio system finishes initializing.
+    /// </summary>
     public event Action StudioSystemInitialized;
+
+    /// <summary>
+    /// Whether or not studio system is initialized yet.
+    /// </summary>
     public bool IsStudioSystemInitialized = false;
 
+    /// <summary>
+    /// Fired when studio system starts updating
+    /// </summary>
     public event Action StudioSystemUpdating;
+
+    /// <summary>
+    /// Fired when studio system has finished updating
+    /// </summary>
     public event Action StudioSystemUpdated;
+
+    /// <summary>
+    /// Fired when connected to an FMOD Studio client for <see href="https://www.fmod.com/docs/2.03/studio/editing-during-live-update.html">live updating</see>
+    /// </summary>
     public event Action LiveUpdateConnected;
+
+    /// <summary>
+    /// Fired when disconnected from an FMOD Studio client
+    /// </summary>
     public event Action LiveUpdateDisconnected;
 
+    /// <summary>
+    /// List of banks currently loaded in the studio system
+    /// </summary>
+    /// <returns></returns>
     public List<FMODBank> LoadedBanks = new();
 
     private FMOD.Studio.SYSTEM_CALLBACK studioSystemCallback;
@@ -87,8 +120,12 @@ public partial class FMODHandler : Node
         StudioSystemUpdated -= OnInitialization;
     }
 
-    public override void _Ready() { }
-
+    /// <summary>
+    /// Sets the <c>Node3D</c> to be used as a listener.
+    /// All spatialized events are played based on their position in relation to the listener.
+    /// <see href="https://www.fmod.com/docs/2.03/api/white-papers-studio-3d-events.html">See here for more info</see>
+    /// </summary>
+    /// <param name="listener"></param>
     public void AttachListener(Node3D listener)
     {
         Listener = listener;
@@ -161,6 +198,10 @@ public partial class FMODHandler : Node
     public void AddAttachedEventInstance(FMODEventInstance attachedEventInstance) =>
         attachedEventInstances.Add(attachedEventInstance, null);
 
+    /// <summary>
+    /// Shuts down the studio system.
+    /// Called automatically when this manager node exits the SceneTree.
+    /// </summary>
     public void Shutdown()
     {
         FMODCaller.CheckResult(StudioSystem.release());

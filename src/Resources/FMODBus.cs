@@ -3,10 +3,17 @@ using FMOD.Studio;
 
 namespace DefluoLib;
 
+/// <summary>
+/// A <see href="https://www.fmod.com/docs/2.03/studio/mixing.html#group-buses-and-routing">Bus</see> resource.
+/// Can be exported from a node to be selected in the editor.
+/// </summary>
 [Tool]
 [GlobalClass]
 public partial class FMODBus : FMODResource
 {
+    /// <summary>
+    /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-bus.html">Bus</see> object.
+    /// </summary>
     public Bus Bus;
 
     public FMODBus(string path)
@@ -21,6 +28,9 @@ public partial class FMODBus : FMODResource
             throw new System.ArgumentException($"Invalid bus path {Path}");
     }
 
+    /// <summary>
+    /// Pause state of bus. Can be used to pause or unpause all events routed to bus.
+    /// </summary>
     public bool Paused
     {
         get
@@ -31,6 +41,9 @@ public partial class FMODBus : FMODResource
         set => FMODCaller.CheckResult(Bus.setPaused(value));
     }
 
+    /// <summary>
+    /// Mute state of bus. Can be used to mute or unmute all events routed to bus.
+    /// </summary>
     public bool Muted
     {
         get
@@ -41,6 +54,9 @@ public partial class FMODBus : FMODResource
         set => FMODCaller.CheckResult(Bus.setMute(value));
     }
 
+    /// <summary>
+    /// Volume of bus.
+    /// </summary>
     public float Volume
     {
         get
@@ -51,6 +67,10 @@ public partial class FMODBus : FMODResource
         set => FMODCaller.CheckResult(Bus.setVolume(value));
     }
 
+    /// <summary>
+    /// Stops all events routed to bus.
+    /// </summary>
+    /// <param name="allowFadeout">If true, events are allowed to fade out.</param>
     public void StopEvents(bool allowFadeout)
     {
         FMODCaller.CheckResult(
