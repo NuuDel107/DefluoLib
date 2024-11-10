@@ -105,6 +105,11 @@ public partial class FMODHandler : Node
             return;
         foreach (var (eventInstance, lastPosition) in attachedEventInstances)
         {
+            if (eventInstance.IsReleased)
+            {
+                attachedEventInstances.Remove(eventInstance);
+                continue;
+            }
             var attr = Calculate3DAttributes(
                 delta,
                 eventInstance.AttachedNode.GlobalPosition,

@@ -51,6 +51,7 @@ public class FMODEventInstance
     }
 
     public bool IsPlaying => PlaybackState == PLAYBACK_STATE.PLAYING;
+    public bool IsReleased { get; set; } = false;
 
     public event Action Created;
     public event Action Destroyed;
@@ -91,6 +92,7 @@ public class FMODEventInstance
                     break;
                 case EVENT_CALLBACK_TYPE.DESTROYED:
                     Destroyed?.Invoke();
+                    IsReleased = true;
                     break;
                 case EVENT_CALLBACK_TYPE.STARTING:
                     Starting?.Invoke();
