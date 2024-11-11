@@ -23,7 +23,7 @@ internal partial class SettingUI : HBoxContainer
 
     public override Array<Dictionary> _GetPropertyList()
     {
-        RefreshSettings();
+        RefreshSettingsList();
 
         var propertyList = new Array<Dictionary>
         {
@@ -52,7 +52,7 @@ internal partial class SettingUI : HBoxContainer
 
     private event Action<Variant> ValueChanged;
 
-    private void RefreshSettings()
+    private void RefreshSettingsList()
     {
         settingProperties = Settings.GetSettingProperties();
         settingNames = settingProperties.Select(property => property.Name).ToArray();
@@ -60,7 +60,7 @@ internal partial class SettingUI : HBoxContainer
 
     public override void _Ready()
     {
-        RefreshSettings();
+        RefreshSettingsList();
 
         if (Engine.IsEditorHint() || TargetSettingIndex == 0)
             return;
@@ -88,6 +88,12 @@ internal partial class SettingUI : HBoxContainer
                 case LineEdit textBox:
                     textBox.TextSubmitted += (text) => UpdateValue((string)text);
                     ValueChanged += (text) => textBox.Text = text.As<string>();
+                    break;
+                case CheckBox checkBox:
+                    checkBox.Toggled += value => UpdateValue(checkBox.ButtonPressed);
+                    break;
+                case CheckButton checkButton:
+                    checkButton.Toggled += value => UpdateValue(checkButton.ButtonPressed);
                     break;
             }
         }
