@@ -98,6 +98,7 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
             PropertyHint.TypeString,
             $"{Variant.Type.String:D}/{PropertyHint.File:D}:*.bank"
         );
+        AddProjectSetting("DefluoLib/FMOD/EnableLiveUpdate", true, Variant.Type.Bool);
     }
 
     public override bool _HasMainScreen() => true;

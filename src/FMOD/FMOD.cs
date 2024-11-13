@@ -25,7 +25,7 @@ public partial class FMODHandler : Node
     public void UpdateStudioSystem() => FMODCaller.CheckResult(StudioSystem.update());
 
     /// <summary>
-    /// Fired once at startup when studio system finishes initializing.
+    /// Fired once at startup when studio system finishes initializing. <br/>
     /// </summary>
     public event Action StudioSystemInitialized;
 
@@ -70,10 +70,14 @@ public partial class FMODHandler : Node
         Name = "FMOD";
         ProcessMode = ProcessModeEnum.Always;
 
+        var enableLiveUpdate = ProjectSettings
+            .GetSetting("DefluoLib/FMOD/EnableLiveUpdate")
+            .As<bool>();
+
         FMOD.Studio.System.create(out StudioSystem);
         StudioSystem.initialize(
             512,
-            FMOD.Studio.INITFLAGS.NORMAL,
+            enableLiveUpdate ? FMOD.Studio.INITFLAGS.LIVEUPDATE : FMOD.Studio.INITFLAGS.NORMAL,
             FMOD.INITFLAGS.NORMAL,
             (IntPtr)0
         );
