@@ -1,5 +1,6 @@
 using Godot;
 using FMOD.Studio;
+using System;
 
 namespace DefluoLib;
 
@@ -11,22 +12,29 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODBus : FMODResource
 {
+    private Bus bus;
+
     /// <summary>
     /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-bus.html">Bus</see> object.
     /// </summary>
-    public Bus Bus;
+    public Bus Bus
+    {
+        get
+        {
+            if (bus.handle == IntPtr.Zero)
+            {
+                if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBus(Path, out bus)))
+                    throw new System.ArgumentException($"Invalid bus path {Path}");
+            }
+            return bus;
+        }
+    }
 
     public FMODBus(string path)
         : base(path) { }
 
     public FMODBus()
         : base() { }
-
-    protected override void Init()
-    {
-        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBus(Path, out Bus)))
-            throw new System.ArgumentException($"Invalid bus path {Path}");
-    }
 
     /// <summary>
     /// Pause state of bus. Can be used to pause or unpause all events routed to bus.

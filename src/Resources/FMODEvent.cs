@@ -1,6 +1,7 @@
 using Godot;
 using FMOD.Studio;
 using System.Collections.Generic;
+using System;
 
 namespace DefluoLib;
 
@@ -12,22 +13,33 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODEvent : FMODResource
 {
+    private EventDescription eventDescription;
+
     /// <summary>
     /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-eventdescription.html">event description</see>.
     /// </summary>
-    public EventDescription Description;
+    public EventDescription Description
+    {
+        get
+        {
+            if (eventDescription.handle == IntPtr.Zero)
+            {
+                if (
+                    !FMODCaller.CheckResult(
+                        Defluo.FMOD.StudioSystem.getEvent(Path, out eventDescription)
+                    )
+                )
+                    throw new System.ArgumentException($"Invalid event path {Path}");
+            }
+            return eventDescription;
+        }
+    }
 
     public FMODEvent(string path)
         : base(path) { }
 
     public FMODEvent()
         : base() { }
-
-    protected override void Init()
-    {
-        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getEvent(Path, out Description)))
-            throw new System.ArgumentException($"Invalid event path {Path}");
-    }
 
     /// <summary>
     /// If event is <see href="https://www.fmod.com/docs/2.03/studio/glossary.html#spatialization">3D spatialized</see>

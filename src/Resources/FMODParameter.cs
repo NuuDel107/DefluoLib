@@ -11,7 +11,26 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODParameter : FMODResource
 {
-    public PARAMETER_DESCRIPTION ParameterDescription;
+    private PARAMETER_DESCRIPTION paramDescription = new();
+    public PARAMETER_DESCRIPTION ParameterDescription
+    {
+        get
+        {
+            if (paramDescription.name == "")
+            {
+                if (
+                    !FMODCaller.CheckResult(
+                        Defluo.FMOD.StudioSystem.getParameterDescriptionByName(
+                            Path,
+                            out paramDescription
+                        )
+                    )
+                )
+                    throw new System.ArgumentException($"Invalid parameter path {Path}");
+            }
+            return paramDescription;
+        }
+    }
 
     public FMODParameter(string path)
         : base(path) { }
@@ -19,11 +38,33 @@ public partial class FMODParameter : FMODResource
     public FMODParameter()
         : base() { }
 
+    private string[] labels = new string[0];
+
     /// <summary>
     /// Possible string values that can be used to set the parameter's value.
     /// Is empty for non-labeled parameters.
     /// </summary>
-    public string[] Labels;
+    public string[] Labels
+    {
+        get
+        {
+            if (!IsLabeled)
+                return labels;
+
+            if (labels.Length == 0)
+            {
+                labels = new string[(int)MaximumValue];
+                for (int i = 0; i < MaximumValue; i++)
+                {
+                    FMODCaller.CheckResult(
+                        Defluo.FMOD.StudioSystem.getParameterLabelByName(Path, i, out var label)
+                    );
+                    Labels[i] = label;
+                }
+            }
+            return labels;
+        }
+    }
 
     /// <summary>
     /// The lowest value that the parameter accepts as its value.
@@ -62,31 +103,6 @@ public partial class FMODParameter : FMODResource
     /// </summary>
     /// <returns></returns>
     public bool IsLabeled => ParameterDescription.flags.HasFlag(PARAMETER_FLAGS.LABELED);
-
-    protected override void Init()
-    {
-        if (
-            !FMODCaller.CheckResult(
-                Defluo.FMOD.StudioSystem.getParameterDescriptionByName(
-                    Path,
-                    out ParameterDescription
-                )
-            )
-        )
-            throw new System.ArgumentException($"Invalid parameter path {Path}");
-
-        if (!IsLabeled)
-            return;
-
-        Labels = new string[(int)MaximumValue];
-        for (int i = 0; i < MaximumValue; i++)
-        {
-            FMODCaller.CheckResult(
-                Defluo.FMOD.StudioSystem.getParameterLabelByName(Path, i, out var label)
-            );
-            Labels[i] = label;
-        }
-    }
 
     /// <summary>
     /// Sets the value of the parameter in the global scope.

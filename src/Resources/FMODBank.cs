@@ -1,5 +1,6 @@
 using Godot;
 using FMOD.Studio;
+using System;
 
 namespace DefluoLib;
 
@@ -15,23 +16,35 @@ public partial class FMODBank : Resource
     public string FilePath { get; set; }
 
     private string path;
-    public string Path
-    {
-        get => path;
-        set
-        {
-            path = value;
-            if (Defluo.FMOD.IsStudioSystemInitialized)
-                Init();
-            else
-                Defluo.FMOD.StudioSystemInitialized += Init;
-        }
-    }
+    public string Path => path;
+
+    private Bank bank;
 
     /// <summary>
     /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-bank.html">Bank</see> object.
     /// </summary>
-    public Bank Bank;
+    public Bank Bank
+    {
+        get
+        {
+            if (bank.handle == IntPtr.Zero)
+            {
+                if (IsLoaded)
+                {
+                    if (
+                        !FMODCaller.CheckResult(
+                            Defluo.FMOD.StudioSystem.getBank(FilePath, out bank)
+                        )
+                    )
+                        throw new ArgumentException($"Invalid loaded bank path {FilePath}");
+                }
+                else
+                    throw new Exception("Bank has not been loaded");
+            }
+            return bank;
+        }
+        private set { bank = value; }
+    }
 
     /// <summary>
     /// If bank is loaded into the studio system.
@@ -42,21 +55,12 @@ public partial class FMODBank : Resource
     {
         IsLoaded = isLoaded;
         if (IsLoaded)
-            Path = path;
+            this.path = path;
         else
             FilePath = path;
     }
 
     public FMODBank() { }
-
-    protected void Init()
-    {
-        if (!IsLoaded)
-            return;
-
-        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBank(FilePath, out Bank)))
-            throw new System.ArgumentException($"Invalid loaded bank path {FilePath}");
-    }
 
     /// <summary>
     /// Loads the bank into the studio system.
@@ -72,7 +76,7 @@ public partial class FMODBank : Resource
                 Defluo.FMOD.StudioSystem.loadBankFile(
                     ProjectSettings.GlobalizePath(FilePath),
                     loadFlags,
-                    out Bank
+                    out bank
                 )
             )
         )

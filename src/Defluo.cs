@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Runtime.InteropServices;
 
 namespace DefluoLib;
@@ -15,36 +16,24 @@ public partial class Defluo : Node
     public static SceneTree GetSceneTree() => (SceneTree)Engine.GetMainLoop();
 
     /// <summary>
-    /// Returns the autoload singleton of the main Defluo class
+    /// Returns the autoload singleton of the main Defluo class. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static Defluo Singleton
-    {
-        get { return GetSceneTree().Root.GetNode<Defluo>("Defluo"); }
-    }
+    public static Defluo Singleton => GetSceneTree().Root.GetNodeOrNull<Defluo>("Defluo");
 
     /// <summary>
-    /// Node that handles access to input actions and updates their states
+    /// Node that handles access to input actions and updates their states. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static Input Input
-    {
-        get { return Singleton.GetNode<Input>("Input"); }
-    }
+    public static Input Input => Singleton?.GetNodeOrNull<Input>("Input");
 
     /// <summary>
-    /// Node that keeps track of settings and can load and save them.
+    /// Node that keeps track of settings and can load and save them. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static Settings Settings
-    {
-        get { return Singleton.GetNode<Settings>("Settings"); }
-    }
+    public static Settings Settings => Singleton?.GetNodeOrNull<Settings>("Settings");
 
     /// <summary>
-    /// Node that maintains the FMOD Studio System. Main access point for the FMOD integration
+    /// Node that maintains the FMOD Studio System. Main access point for the FMOD integration. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static FMODHandler FMOD
-    {
-        get { return Singleton.GetNode<FMODHandler>("FMOD"); }
-    }
+    public static FMODHandler FMOD => Singleton?.GetNodeOrNull<FMODHandler>("FMOD");
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     static extern bool SetDllDirectory(string lpPathName);

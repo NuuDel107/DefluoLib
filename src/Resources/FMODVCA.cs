@@ -1,5 +1,6 @@
 using Godot;
 using FMOD.Studio;
+using System;
 
 namespace DefluoLib;
 
@@ -11,22 +12,29 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODVCA : FMODResource
 {
+    private VCA _VCA;
+
     /// <summary>
     /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-vca.html">VCA</see> object.
     /// </summary>
-    public VCA VCA;
+    public VCA VCA
+    {
+        get
+        {
+            if (_VCA.handle == IntPtr.Zero)
+            {
+                if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getVCA(Path, out _VCA)))
+                    throw new System.ArgumentException($"Invalid VCA path {Path}");
+            }
+            return _VCA;
+        }
+    }
 
     public FMODVCA(string path)
         : base(path) { }
 
     public FMODVCA()
         : base() { }
-
-    protected override void Init()
-    {
-        if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getVCA(Path, out VCA)))
-            throw new System.ArgumentException($"Invalid VCA path {Path}");
-    }
 
     /// <summary>
     /// Volume of VCA.
