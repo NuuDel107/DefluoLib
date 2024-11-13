@@ -1,13 +1,13 @@
-#if TOOLS
-using Godot;
-using Godot.Collections;
-
 namespace DefluoLib;
 
+using Godot;
+using Godot.Collections;
+using System.Runtime.InteropServices;
+
 [Tool]
-internal partial class DefluoLib : EditorPlugin, ISerializationListener
+public partial class DefluoLib : EditorPlugin, ISerializationListener
 {
-    private const string mainScreenScenePath = "res://addons/DefluoLib/src/MainScreen.tscn";
+    private const string MAIN_SCREEN_SCENE_PATH = "res://addons/DefluoLib/src/MainScreen.tscn";
 
     /// <summary>
     /// Returns the scene tree of the currently running scene.
@@ -21,15 +21,34 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
     private FMODInspectorPlugin inspectorPlugin;
     private MainScreen mainScreen;
 
-    public FMODLister FMODLister;
+    private FMODLister fmodLister;
+    public static FMODLister FMODLister => Singleton.fmodLister;
 
-    public DefluoLib() { }
+    private FMODIcons fmodIcons;
+    public static FMODIcons FMODIcons => Singleton.fmodIcons;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool SetDllDirectory(string lpPathName);
+
+    /// <summary>
+    /// Sets the directory path in the project from which to load .dll libraries by default.
+    /// </summary>
+    /// <param name="directoryPath">The local directory path (starting with "res://")</param>
+    /// <returns></returns>
+    public static bool SetDllLoadDirectory(string directoryPath = "res://addons/DefluoLib/bin") =>
+        SetDllDirectory(ProjectSettings.GlobalizePath(directoryPath));
+
+    public DefluoLib()
+    {
+        // Set the default directory for importing DLLs
+        SetDllLoadDirectory();
+    }
 
     public void OnBeforeSerialize()
     {
         // Release the studio system when reloading assemblies
         // It will be reinitialized afterwards
-        FMODLister.StudioSystem.release();
+        fmodLister.StudioSystem.release();
         // Remove main screen before reinitialization
         mainScreen?.QueueFree();
     }
@@ -45,10 +64,11 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
         Name = "DefluoLib";
         AddAutoloadSingleton("Defluo", "res://addons/DefluoLib/src/Defluo.cs");
 
-        FMODLister = new();
+        fmodLister = new();
+        fmodIcons = new();
 
         mainScreen = ResourceLoader
-            .Load<PackedScene>(mainScreenScenePath)
+            .Load<PackedScene>(MAIN_SCREEN_SCENE_PATH)
             .Instantiate<MainScreen>();
         EditorInterface.Singleton.GetEditorMainScreen().AddChild(mainScreen);
         _MakeVisible(false);
@@ -141,9 +161,8 @@ internal partial class DefluoLib : EditorPlugin, ISerializationListener
 
     public override void _ExitTree()
     {
-        FMODLister.StudioSystem.release();
+        fmodLister.StudioSystem.release();
         RemoveInspectorPlugin(inspectorPlugin);
         mainScreen?.QueueFree();
     }
 }
-#endif

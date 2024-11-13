@@ -1,10 +1,9 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD;
 using System;
-using FMOD.Studio;
 using System.Collections.Generic;
-
-namespace DefluoLib;
 
 /// <summary>
 /// High-level manager for the FMOD API
@@ -17,7 +16,7 @@ public partial class FMODHandler : Node
 
     public FMOD.Studio.System StudioSystem;
     public Node3D Listener;
-    private Vector3? listenerLastPosition = null;
+    private Vector3? listenerLastPosition;
 
     /// <summary>
     /// Updates the studio system. <see href="https://www.fmod.com/docs/2.03/api/studio-guide.html#studio-system-processing">See here for more info</see>
@@ -32,7 +31,7 @@ public partial class FMODHandler : Node
     /// <summary>
     /// Whether or not studio system is initialized yet.
     /// </summary>
-    public bool IsStudioSystemInitialized = false;
+    public bool IsStudioSystemInitialized;
 
     /// <summary>
     /// Fired when studio system starts updating
@@ -58,7 +57,7 @@ public partial class FMODHandler : Node
     /// List of banks currently loaded in the studio system
     /// </summary>
     /// <returns></returns>
-    public List<FMODBank> LoadedBanks = new();
+    public List<FMODBank> LoadedBanks = [];
 
     private FMOD.Studio.SYSTEM_CALLBACK studioSystemCallback;
 
@@ -78,8 +77,8 @@ public partial class FMODHandler : Node
         StudioSystem.initialize(
             512,
             enableLiveUpdate ? FMOD.Studio.INITFLAGS.LIVEUPDATE : FMOD.Studio.INITFLAGS.NORMAL,
-            FMOD.INITFLAGS.NORMAL,
-            (IntPtr)0
+            INITFLAGS.NORMAL,
+            0
         );
 
         studioSystemCallback = (_, type, _, _) =>
@@ -135,7 +134,7 @@ public partial class FMODHandler : Node
         Listener = listener;
     }
 
-    private Dictionary<FMODEventInstance, Vector3?> attachedEventInstances = new();
+    private readonly Dictionary<FMODEventInstance, Vector3?> attachedEventInstances = [];
 
     public override void _PhysicsProcess(double delta)
     {

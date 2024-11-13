@@ -1,7 +1,7 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD;
-
-namespace DefluoLib;
 
 /// <summary>
 /// Static class used to make calls to raw FMOD API functions.

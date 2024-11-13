@@ -1,9 +1,9 @@
+namespace DefluoLib;
+
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-namespace DefluoLib;
 
 /// <summary>
 /// Miscellaneous extensions to pre-existing C# and Godot classes
@@ -48,7 +48,7 @@ public static class Extensions
     /// <summary>
     /// Converts FMOD Core API's <c>VECTOR</c> struct to Godot's <c>Vector3</c>
     /// </summary>
-    public static Vector3 ToGodot(this FMOD.VECTOR self) => new Vector3(-self.x, self.y, self.z);
+    public static Vector3 ToGodot(this FMOD.VECTOR self) => new(-self.x, self.y, self.z);
 
     /// <summary>
     /// Returns the first instance of a child node of given type
@@ -63,12 +63,12 @@ public static class Extensions
             if (child is T correctChild)
                 return correctChild;
         }
-        return null;
+        throw new ArgumentException($"No child of given type was found");
     }
 
     public static List<Node> GetDescendants(this Node self)
     {
-        List<Node> nodes = new();
+        List<Node> nodes = [];
         foreach (var child in self.GetChildren())
         {
             nodes.Add(child);

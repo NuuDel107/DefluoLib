@@ -1,12 +1,13 @@
-using Godot;
-
 namespace DefluoLib;
+
+using System;
+using Godot;
 
 public partial class Input : Node
 {
     public static Texture2D GetInputTexture(DigitalInput input)
     {
-        string folderPath = "";
+        var folderPath = "";
         switch (input.Type)
         {
             case DigitalInputType.Key:
@@ -26,8 +27,7 @@ public partial class Input : Node
             return ResourceLoader.Load<Texture2D>(path);
         else
         {
-            GD.PushError($"Input texture couldn't be found at path {path}");
-            return null;
+            throw new ArgumentException($"Input texture couldn't be found at path {path}");
         }
     }
 }

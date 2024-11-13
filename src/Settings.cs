@@ -1,27 +1,27 @@
+namespace DefluoLib;
+
 using Godot;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
-
-namespace DefluoLib;
 
 /// <summary>
 /// A setting value representing some Variant.
 /// </summary>
 public class VariantSetting
 {
-    private Variant _value;
+    private Variant value;
     public Variant Value
     {
-        get { return _value; }
+        get => value;
         set
         {
             ValueChanged?.Invoke(value);
-            _value = value;
+            this.value = value;
         }
     }
 
-    public Godot.Variant.Type Type = Variant.Type.Nil;
+    public Variant.Type Type = Variant.Type.Nil;
     public Variant DefaultValue;
 
     public VariantSetting(Variant defaultValue)
@@ -77,8 +77,8 @@ public class FloatSetting : VariantSetting
 /// <summary>
 /// A setting value representing an enum.
 /// </summary>
-public class EnumSetting<T> : VariantSetting
-    where T : System.Enum
+public class EnumSetting<[MustBeVariant] T> : VariantSetting
+    where T : Enum
 {
     public EnumSetting(int defaultValue)
         : base(defaultValue)
@@ -122,7 +122,7 @@ public class StringSetting : VariantSetting
 /// </summary>
 public partial class Settings : Node
 {
-    public const string UserSettingsResourcePath = "user://settings.tres";
+    public const string USER_SETTINGS_RESOURCE_PATH = "user://settings.tres";
 
     private List<PropertyInfo> settingProperties;
     private DictionaryResource defaultResource;
@@ -139,9 +139,9 @@ public partial class Settings : Node
         // using settings with default values before they get overwritten by initialization
         defaultResource = CreateResourceFromValues();
 
-        if (ResourceLoader.Exists(UserSettingsResourcePath))
+        if (ResourceLoader.Exists(USER_SETTINGS_RESOURCE_PATH))
         {
-            resource = ResourceLoader.Load<DictionaryResource>(UserSettingsResourcePath);
+            resource = ResourceLoader.Load<DictionaryResource>(USER_SETTINGS_RESOURCE_PATH);
             Load(resource);
         }
         else
@@ -157,7 +157,7 @@ public partial class Settings : Node
     /// <returns></returns>
     internal static List<PropertyInfo> GetSettingProperties()
     {
-        List<PropertyInfo> list = new();
+        List<PropertyInfo> list = [];
         foreach (var property in typeof(Settings).GetProperties())
         {
             if (typeof(VariantSetting).IsAssignableFrom(property.PropertyType))
@@ -172,10 +172,14 @@ public partial class Settings : Node
     /// </summary>
     public Dictionary<string, VariantSetting> GetSettings()
     {
-        Dictionary<string, VariantSetting> settings = new();
+        Dictionary<string, VariantSetting> settings = [];
         foreach (var property in settingProperties)
         {
+#pragma warning disable CS8600
+#pragma warning disable CS8604
             settings.Add(property.Name, (VariantSetting)property.GetValue(this));
+#pragma warning restore CS8604
+#pragma warning restore CS8600
         }
         return settings;
     }
@@ -190,7 +194,7 @@ public partial class Settings : Node
         // Loop through settings and create a dictionary entry for each of them
         foreach (var (settingName, setting) in GetSettings())
         {
-            newResource.Dictionary.Add(settingName, (Variant)setting.Value);
+            newResource.Dictionary.Add(settingName, setting.Value);
         }
         return newResource;
     }
@@ -204,9 +208,9 @@ public partial class Settings : Node
         // if definition name is found in resource dictionary
         foreach (var (settingName, setting) in GetSettings())
         {
-            if (resourceToLoad.Dictionary.ContainsKey(settingName))
+            if (resourceToLoad.Dictionary.TryGetValue(settingName, out var value))
             {
-                setting.Value = resourceToLoad.Dictionary[settingName];
+                setting.Value = value;
             }
         }
         Defluo.Print("Loaded settings from resource");
@@ -218,7 +222,7 @@ public partial class Settings : Node
     public void Save()
     {
         resource = CreateResourceFromValues();
-        ResourceSaver.Save(resource, UserSettingsResourcePath);
+        ResourceSaver.Save(resource, USER_SETTINGS_RESOURCE_PATH);
         Defluo.Print("Saved settings to disk");
     }
 

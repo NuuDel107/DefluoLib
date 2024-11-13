@@ -1,8 +1,8 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD.Studio;
 using System;
-
-namespace DefluoLib;
 
 /// <summary>
 /// A <see href="https://www.fmod.com/docs/2.03/studio/mixing.html#group-buses-and-routing">Bus</see> resource.
@@ -24,7 +24,7 @@ public partial class FMODBus : FMODResource
             if (bus.handle == IntPtr.Zero)
             {
                 if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getBus(Path, out bus)))
-                    throw new System.ArgumentException($"Invalid bus path {Path}");
+                    throw new ArgumentException($"Invalid bus path {Path}");
             }
             return bus;
         }

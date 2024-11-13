@@ -1,6 +1,6 @@
-using System;
-
 namespace DefluoLib;
+
+using System;
 
 /// <summary>
 /// Add this attribute to definitions to define categories for them

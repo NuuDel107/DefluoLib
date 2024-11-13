@@ -1,9 +1,9 @@
-using Godot;
-
 namespace DefluoLib;
 
+using Godot;
+
 [GlobalClass]
-internal partial class KeybindPopulator : Control
+public partial class KeybindPopulator : Control
 {
     [Export]
     public Container Container;

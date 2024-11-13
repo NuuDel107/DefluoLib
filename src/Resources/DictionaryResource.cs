@@ -1,6 +1,6 @@
-using Godot;
-
 namespace DefluoLib;
+
+using Godot;
 
 /// <summary>
 /// A resource containing a dictionary.
@@ -11,5 +11,9 @@ public partial class DictionaryResource : Resource
     [Export]
     public Godot.Collections.Dictionary<string, Variant> Dictionary;
 
-    public DictionaryResource() => Dictionary = new();
+    public DictionaryResource()
+    {
+        Dictionary = [];
+    }
+
 }

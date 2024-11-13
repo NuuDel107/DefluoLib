@@ -1,0 +1,4 @@
+# Don't do linter warnings for the included bindings
+
+[*.cs]
+generated_code = true

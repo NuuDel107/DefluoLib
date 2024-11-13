@@ -1,3 +1,5 @@
+namespace DefluoLib;
+
 using System;
 using System.Linq;
 using System.Reflection;
@@ -5,16 +7,14 @@ using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
 
-namespace DefluoLib;
-
 [Tool]
 [GlobalClass]
-internal partial class SettingUI : HBoxContainer
+public partial class SettingUI : HBoxContainer
 {
     [Export]
-    public Array<Control> UIElements = new();
+    public Array<Control> UIElements = [];
 
-    public int TargetSettingIndex = 0;
+    public int TargetSettingIndex;
 
     public VariantSetting Setting;
 
@@ -86,7 +86,7 @@ internal partial class SettingUI : HBoxContainer
                     ValueChanged += (value) => dropdown.Select(value.As<int>());
                     break;
                 case LineEdit textBox:
-                    textBox.TextSubmitted += (text) => UpdateValue((string)text);
+                    textBox.TextSubmitted += (text) => UpdateValue(text);
                     ValueChanged += (text) => textBox.Text = text.As<string>();
                     break;
                 case CheckBox checkBox:

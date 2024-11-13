@@ -1,38 +1,42 @@
 namespace DefluoLib;
 
 using Godot;
+using System;
+
+public abstract class AnimationParameter(AnimationTree animTree) : IDisposable
+{
+    protected readonly AnimationTree animationTree = animTree;
+
+    public void Dispose() => GC.SuppressFinalize(this);
+}
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodeoneshot.html">AnimationNodeOneShot</see>
 /// </summary>
-public class OneshotAnimationParameter
+public class OneshotAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName RequestPath;
     public StringName ActivePath;
     public AnimationNodeOneShot Node;
 
-    public OneshotAnimationParameter(AnimationTree animationTree, string parameterName)
+    public OneshotAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         RequestPath = new StringName($"parameters/{parameterName}/request");
         ActivePath = new StringName($"parameters/{parameterName}/active");
-        Node = (AnimationNodeOneShot)AnimationTree.Get($"parameters/{parameterName}");
+        Node = (AnimationNodeOneShot)animationTree.Get($"parameters/{parameterName}");
     }
 
     public void Fire() =>
-        AnimationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.Fire);
+        animationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.Fire);
 
     public void Abort() =>
-        AnimationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.Abort);
+        animationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.Abort);
 
     public void FadeOut() =>
-        AnimationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.FadeOut);
+        animationTree.Set(RequestPath, (int)AnimationNodeOneShot.OneShotRequest.FadeOut);
 
-    public bool IsActive
-    {
-        get => (bool)AnimationTree.Get(ActivePath);
-    }
+    public bool IsActive => (bool)animationTree.Get(ActivePath);
 }
 
 /// <summary>
@@ -61,18 +65,17 @@ public enum BlendAnimationParameterType
 /// <summary>
 /// Parameter wrapper for different blend animation nodes
 /// </summary>
-public class BlendAnimationParameter
+public class BlendAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName Path;
 
     public BlendAnimationParameter(
-        AnimationTree animationTree,
+        AnimationTree animTree,
         string parameterName,
         BlendAnimationParameterType type
     )
+    : base(animTree)
     {
-        AnimationTree = animationTree;
         switch (type)
         {
             case BlendAnimationParameterType.Blend:
@@ -89,150 +92,138 @@ public class BlendAnimationParameter
 
     public float Amount
     {
-        get => (float)AnimationTree.Get(Path);
-        set => AnimationTree.Set(Path, value);
+        get => (float)animationTree.Get(Path);
+        set => animationTree.Set(Path, value);
     }
 }
 
 /// <summary>
 /// Condition wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachine.html">AnimationNodeStateMachine</see>
 /// </summary>
-public class StateMachineAnimationParameter
+public class StateMachineAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName ConditionPath;
     public AnimationNodeStateMachine Node;
     public AnimationNodeStateMachinePlayback Playback;
 
-    public StateMachineAnimationParameter(AnimationTree animationTree, string parameterName)
+    public StateMachineAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         ConditionPath = new StringName($"parameters/{parameterName}/");
         Playback = (AnimationNodeStateMachinePlayback)
-            AnimationTree.Get($"parameters/{parameterName}/playback");
-        Node = (AnimationNodeStateMachine)AnimationTree.Get($"parameters/{parameterName}");
+            animationTree.Get($"parameters/{parameterName}/playback");
+        Node = (AnimationNodeStateMachine)animationTree.Get($"parameters/{parameterName}");
     }
 
     public void SetCondition(string conditionName, bool value) =>
-        AnimationTree.Set(ConditionPath + conditionName, value);
+        animationTree.Set(ConditionPath + conditionName, value);
 
     public void GetCondition(string conditionName) =>
-        AnimationTree.Get(ConditionPath + conditionName);
+        animationTree.Get(ConditionPath + conditionName);
 }
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodeblendspace1d.html">AnimationNodeBlendSpace1D</see>
 /// </summary>
-public class BlendSpace1DAnimationParameter
+public class BlendSpace1DAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName Path;
     public AnimationNodeBlendSpace1D Node;
 
-    public BlendSpace1DAnimationParameter(AnimationTree animationTree, string parameterName)
+    public BlendSpace1DAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         Path = new StringName($"parameters/{parameterName}/blend_position");
-        Node = (AnimationNodeBlendSpace1D)AnimationTree.Get($"parameters/{parameterName}");
+        Node = (AnimationNodeBlendSpace1D)animationTree.Get($"parameters/{parameterName}");
     }
 
     public float Position
     {
-        get => (float)AnimationTree.Get(Path);
-        set => AnimationTree.Set(Path, value);
+        get => (float)animationTree.Get(Path);
+        set => animationTree.Set(Path, value);
     }
 }
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodeblendspace2d.html">AnimationNodeBlendSpace2D</see>
 /// </summary>
-public class BlendSpace2DAnimationParameter
+public class BlendSpace2DAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName Path;
     public AnimationNodeBlendSpace2D Node;
 
-    public BlendSpace2DAnimationParameter(AnimationTree animationTree, string parameterName)
+    public BlendSpace2DAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         Path = new StringName($"parameters/{parameterName}/blend_position");
-        Node = (AnimationNodeBlendSpace2D)AnimationTree.Get($"parameters/{parameterName}");
+        Node = (AnimationNodeBlendSpace2D)animationTree.Get($"parameters/{parameterName}");
     }
 
     public Vector2 Position
     {
-        get => (Vector2)AnimationTree.Get(Path);
-        set => AnimationTree.Set(Path, value);
+        get => (Vector2)animationTree.Get(Path);
+        set => animationTree.Set(Path, value);
     }
 }
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodetimescale.html">AnimationNodeTimeScale</see>
 /// </summary>
-public class TimeScaleAnimationParameter
+public class TimeScaleAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName Path;
 
-    public TimeScaleAnimationParameter(AnimationTree animationTree, string parameterName)
+    public TimeScaleAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         Path = new StringName($"parameters/{parameterName}/scale");
     }
 
     public float Scale
     {
-        get => (float)AnimationTree.Get(Path);
-        set => AnimationTree.Set(Path, value);
+        get => (float)animationTree.Get(Path);
+        set => animationTree.Set(Path, value);
     }
 }
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodetimeseek.html">AnimationNodeTimeSeek</see>
 /// </summary>
-public class TimeSeekAnimationParameter
+public class TimeSeekAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName RequestPath;
 
-    public TimeSeekAnimationParameter(AnimationTree animationTree, string parameterName)
+    public TimeSeekAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         RequestPath = new StringName($"parameters/{parameterName}/seek_request");
     }
 
-    public void Seek(float seekValue) => AnimationTree.Set(RequestPath, seekValue);
+    public void Seek(float seekValue) => animationTree.Set(RequestPath, seekValue);
 }
 
 /// <summary>
 /// Parameter wrapper for <see href="https://docs.godotengine.org/en/stable/classes/class_animationnodetransition.html">AnimationNodeTransition</see>
 /// </summary>
-public class TransitionAnimationParameter
+public class TransitionAnimationParameter : AnimationParameter
 {
-    private AnimationTree AnimationTree;
     public StringName RequestPath;
     public StringName StatePath;
     public StringName IndexPath;
     public AnimationNodeTransition Node;
 
-    public TransitionAnimationParameter(AnimationTree animationTree, string parameterName)
+    public TransitionAnimationParameter(AnimationTree animTree, string parameterName)
+        : base(animTree)
     {
-        AnimationTree = animationTree;
         RequestPath = new StringName($"parameters/{parameterName}/transition_request");
         StatePath = new StringName($"parameters/{parameterName}/current_state");
         IndexPath = new StringName($"parameters/{parameterName}/current_index");
-        Node = (AnimationNodeTransition)AnimationTree.Get($"parameters/{parameterName}");
+        Node = (AnimationNodeTransition)animationTree.Get($"parameters/{parameterName}");
     }
 
-    public void Transition(string state) => AnimationTree.Set(RequestPath, state);
+    public void Transition(string state) => animationTree.Set(RequestPath, state);
 
-    public string CurrentState
-    {
-        get => (string)AnimationTree.Get(StatePath);
-    }
+    public string CurrentState => (string)animationTree.Get(StatePath);
 
-    public string CurrentIndex
-    {
-        get => (string)AnimationTree.Get(IndexPath);
-    }
+    public string CurrentIndex => (string)animationTree.Get(IndexPath);
 }

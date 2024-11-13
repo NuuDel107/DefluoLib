@@ -1,9 +1,9 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD;
 using FMOD.Studio;
 using System;
-
-namespace DefluoLib;
 
 /// <summary>
 /// An <see href="https://www.fmod.com/docs/2.03/studio/fmod-studio-concepts.html#events-and-event-instances">instance</see> of an event.
@@ -86,7 +86,7 @@ public class FMODEventInstance
     /// If event instance has been released from memory
     /// </summary>
     /// <value></value>
-    public bool IsReleased { get; set; } = false;
+    public bool IsReleased { get; set; }
 
     /// <summary>
     /// Called when an instance is fully created.
@@ -184,7 +184,7 @@ public class FMODEventInstance
     /// </summary>
     public event Action<TIMELINE_NESTED_BEAT_PROPERTIES> NestedTimelineBeatHit;
 
-    private EVENT_CALLBACK eventCallback;
+    private readonly EVENT_CALLBACK eventCallback;
 
     public FMODEventInstance(FMODEvent @event)
         : this(@event.Description) { }
@@ -379,7 +379,7 @@ public class FMODEventInstance
         var parameter = new FMODParameter(name);
 
         if (!parameter.IsLabeled)
-            throw new Exception("Parameter is not labeled");
+            throw new InvalidOperationException("Parameter is not labeled");
 
         var value = GetParameter(name);
         return parameter.Labels[(int)value];

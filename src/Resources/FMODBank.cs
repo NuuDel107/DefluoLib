@@ -1,8 +1,8 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD.Studio;
 using System;
-
-namespace DefluoLib;
 
 /// <summary>
 /// A <see href="https://www.fmod.com/docs/2.03/studio/getting-events-into-your-game.html#banks">Bank</see> resource.
@@ -39,11 +39,11 @@ public partial class FMODBank : Resource
                         throw new ArgumentException($"Invalid loaded bank path {FilePath}");
                 }
                 else
-                    throw new Exception("Bank has not been loaded");
+                    throw new InvalidOperationException("Bank has not been loaded");
             }
             return bank;
         }
-        private set { bank = value; }
+        private set => bank = value;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public partial class FMODBank : Resource
     public void Load(LOAD_BANK_FLAGS loadFlags = LOAD_BANK_FLAGS.NORMAL)
     {
         if (IsLoaded)
-            throw new System.Exception($"Bank {FilePath} is already loaded");
+            throw new InvalidOperationException($"Bank {FilePath} is already loaded");
 
         if (
             !FMODCaller.CheckResult(
@@ -81,7 +81,7 @@ public partial class FMODBank : Resource
             )
         )
         {
-            throw new System.ArgumentException($"Invalid bank file path {FilePath}");
+            throw new ArgumentException($"Invalid bank file path {FilePath}");
         }
         IsLoaded = true;
         Bank.getPath(out path);
@@ -93,7 +93,7 @@ public partial class FMODBank : Resource
     public void Unload()
     {
         if (!IsLoaded)
-            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+            throw new InvalidOperationException($"Bank {FilePath} hasn't been loaded");
 
         FMODCaller.CheckResult(Bank.unload());
         IsLoaded = false;
@@ -106,7 +106,7 @@ public partial class FMODBank : Resource
     public void LoadSampleData()
     {
         if (!IsLoaded)
-            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+            throw new InvalidOperationException($"Bank {FilePath} hasn't been loaded");
 
         FMODCaller.CheckResult(Bank.loadSampleData());
     }
@@ -117,7 +117,7 @@ public partial class FMODBank : Resource
     public void UnloadSampleData()
     {
         if (!IsLoaded)
-            throw new System.Exception($"Bank {FilePath} hasn't been loaded");
+            throw new InvalidOperationException($"Bank {FilePath} hasn't been loaded");
 
         FMODCaller.CheckResult(Bank.unloadSampleData());
     }

@@ -1,10 +1,10 @@
+namespace DefluoLib;
+
 using Godot;
 using System.Collections.Generic;
 
-namespace DefluoLib;
-
 [GlobalClass]
-internal partial class KeybindTemplate : HBoxContainer
+public partial class KeybindTemplate : HBoxContainer
 {
     [Export]
     public NodePath NameLabel;
@@ -18,12 +18,13 @@ internal partial class KeybindTemplate : HBoxContainer
 
     [Export]
     public NodePath Button3;
+
     [Export]
     public NodePath Button4;
 
     public Keybind Keybind;
-    public DigitalInput[] KeyboardInputs;
-    public DigitalInput[] ControllerInputs;
+    public DigitalInput?[] KeyboardInputs;
+    public DigitalInput?[] ControllerInputs;
 
     public List<Button> Buttons;
 
@@ -33,7 +34,7 @@ internal partial class KeybindTemplate : HBoxContainer
         GetNode<Label>(NameLabel).Text = keybind.DisplayName;
 
         // Add buttons to list only if previous button has also been added
-        Buttons = new();
+        Buttons = [];
         if (!Button1.IsEmpty)
         {
             Buttons.Add(GetNode<Button>(Button1));
@@ -52,14 +53,14 @@ internal partial class KeybindTemplate : HBoxContainer
         }
 
         // Sort keyboard inputs and controllerinputs into their separate arrays
-        KeyboardInputs = new DigitalInput[Buttons.Count];
-        ControllerInputs = new DigitalInput[Buttons.Count];
+        KeyboardInputs = new DigitalInput?[Buttons.Count];
+        ControllerInputs = new DigitalInput?[Buttons.Count];
 
         var k = 0;
         var c = 0;
         foreach (var input in Keybind.BindedInputs)
         {
-            if (input.Type == DigitalInputType.Key || input.Type == DigitalInputType.MouseButton)
+            if (input.Type is DigitalInputType.Key or DigitalInputType.MouseButton)
             {
                 KeyboardInputs[k] = input;
                 k++;
@@ -129,7 +130,6 @@ internal partial class KeybindTemplate : HBoxContainer
                 Defluo.Input.RebindingButton = false;
             };
         }
-
     }
 
     /// <summary>
@@ -137,7 +137,7 @@ internal partial class KeybindTemplate : HBoxContainer
     /// </summary>
     private void UpdateInputs()
     {
-        Keybind.BindedInputs = new();
+        Keybind.BindedInputs = [];
         foreach (var input in ControllerInputs)
         {
             if (input != null)
@@ -156,7 +156,9 @@ internal partial class KeybindTemplate : HBoxContainer
     /// <param name="controllerInput"></param>
     private void UpdateIcons(bool controllerInput)
     {
-        foreach (var (input, index) in (controllerInput ? ControllerInputs : KeyboardInputs).WithIndex())
+        foreach (
+            var (input, index) in (controllerInput ? ControllerInputs : KeyboardInputs).WithIndex()
+        )
         {
             if (input == null || Buttons[index].Disabled)
                 Buttons[index].Icon = null;

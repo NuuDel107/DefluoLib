@@ -1,9 +1,9 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD.Studio;
 using System.Collections.Generic;
 using System;
-
-namespace DefluoLib;
 
 /// <summary>
 /// An <see href="https://www.fmod.com/docs/2.03/studio/fmod-studio-concepts.html#event">Event</see> resource.
@@ -29,7 +29,7 @@ public partial class FMODEvent : FMODResource
                         Defluo.FMOD.StudioSystem.getEvent(Path, out eventDescription)
                     )
                 )
-                    throw new System.ArgumentException($"Invalid event path {Path}");
+                    throw new ArgumentException($"Invalid event path {Path}");
             }
             return eventDescription;
         }
@@ -131,7 +131,7 @@ public partial class FMODEvent : FMODResource
         }
     }
 
-    private List<FMODEventInstance> OneshotInstances = new();
+    private readonly List<FMODEventInstance> oneshotInstances = [];
 
     /// <summary>
     /// Creates a new <see href="https://www.fmod.com/docs/2.03/studio/fmod-studio-concepts.html#events-and-event-instances">event instance</see> from the event.
@@ -150,13 +150,13 @@ public partial class FMODEvent : FMODResource
         // Oneshot instances need to be added to a list
         // so they aren't garbage collected before they are released
         var instance = CreateInstance();
-        OneshotInstances.Add(instance);
+        oneshotInstances.Add(instance);
 
         instance.SetParameters(parameters);
         instance.Start();
         instance.Release();
 
-        instance.Destroyed += () => OneshotInstances.Remove(instance);
+        instance.Destroyed += () => oneshotInstances.Remove(instance);
     }
 
     /// <summary>
@@ -170,13 +170,13 @@ public partial class FMODEvent : FMODResource
     public void PlayAttached(Node3D nodeToAttach, params (string name, Variant value)[] parameters)
     {
         var instance = CreateInstance();
-        OneshotInstances.Add(instance);
+        oneshotInstances.Add(instance);
 
         instance.AttachNode(nodeToAttach);
         instance.SetParameters(parameters);
         instance.Start();
         instance.Release();
 
-        instance.Destroyed += () => OneshotInstances.Remove(instance);
+        instance.Destroyed += () => oneshotInstances.Remove(instance);
     }
 }

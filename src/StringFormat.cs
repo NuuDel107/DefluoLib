@@ -1,7 +1,6 @@
-using Godot;
-using System;
-
 namespace DefluoLib;
+
+using Godot;
 
 /// <summary>
 /// Class that contains static string formatting functions.
@@ -29,16 +28,17 @@ public partial class StringFormat
     /// <returns></returns>
     public static string SnakeToPascal(string str)
     {
-        string output = "";
-        string[] words = str.Split('_');
-        words[0] = words[0][0].ToString().ToLower() + words[0][1..];
+        var output = "";
+        var words = str.Split('_');
+        words[0] = words[0][0].ToString().ToLowerInvariant() + words[0][1..];
 
         if (words.Length == 1)
             return words[0];
-        for (int i = 0; i < words.Length; i++)
+        for (var i = 0; i < words.Length; i++)
         {
             if (i != 0)
-                words[i] = words[i][0].ToString().ToUpper() + words[i][1..].ToLower();
+                words[i] =
+                    words[i][0].ToString().ToUpperInvariant() + words[i][1..].ToLowerInvariant();
             output += words[i];
         }
         return output;
@@ -62,7 +62,7 @@ public partial class StringFormat
     /// <returns></returns>
     public static string VariantToString(Variant variant)
     {
-        string output = "";
+        var output = "";
         switch (variant.VariantType)
         {
             case Variant.Type.Bool:

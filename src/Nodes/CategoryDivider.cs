@@ -1,9 +1,9 @@
-using Godot;
-
 namespace DefluoLib;
 
+using Godot;
+
 [GlobalClass]
-internal partial class CategoryDivider : HBoxContainer
+public partial class CategoryDivider : HBoxContainer
 {
     [Export]
     public NodePath Label;

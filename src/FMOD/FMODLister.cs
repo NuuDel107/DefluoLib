@@ -1,40 +1,29 @@
 namespace DefluoLib;
 
 using System;
-using System.Runtime.InteropServices;
-
 using Godot;
-using FMOD;
 using FMOD.Studio;
 using System.Collections.Generic;
 using System.IO;
+#pragma warning disable IDE0005
+using FMOD;
+#pragma warning restore IDE0005
 
 public class FMODLister
 {
     public FMOD.Studio.System StudioSystem;
 
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    static extern bool SetDllDirectory(string lpPathName);
-
-    public List<string> EventPaths = new();
-    public List<string> BusPaths = new();
-    public List<string> VCAPaths = new();
-    public List<string> ParameterPaths = new();
-    public List<Bank> Banks = new();
+    public List<string> EventPaths = [];
+    public List<string> BusPaths = [];
+    public List<string> VCAPaths = [];
+    public List<string> ParameterPaths = [];
+    public List<Bank> Banks = [];
 
     public FMODLister()
     {
-        // Set the default directory for importing DLLs
-        SetDllDirectory(ProjectSettings.GlobalizePath("res://addons/DefluoLib/bin"));
-
         // Initialize studio system
         FMOD.Studio.System.create(out StudioSystem);
-        StudioSystem.initialize(
-            512,
-            FMOD.Studio.INITFLAGS.NORMAL,
-            FMOD.INITFLAGS.NORMAL,
-            (IntPtr)0
-        );
+        StudioSystem.initialize(512, FMOD.Studio.INITFLAGS.NORMAL, FMOD.INITFLAGS.NORMAL, 0);
 
         List();
     }
@@ -67,7 +56,7 @@ public class FMODLister
         // Loop through all resource paths in bank and add them to lists
         // where they can be used by the editor properties
         stringBank.getStringCount(out var count);
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             stringBank.getStringInfo(i, out var guid, out var path);
 

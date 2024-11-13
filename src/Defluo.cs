@@ -1,8 +1,6 @@
-using Godot;
-using System;
-using System.Runtime.InteropServices;
-
 namespace DefluoLib;
+
+using Godot;
 
 /// <summary>
 /// Access point for the different classes in <c>DefluoLib</c>
@@ -23,25 +21,21 @@ public partial class Defluo : Node
     /// <summary>
     /// Node that handles access to input actions and updates their states. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static Input Input => Singleton?.GetNodeOrNull<Input>("Input");
+    public static Input Input => Singleton.GetNodeOrNull<Input>("Input");
 
     /// <summary>
     /// Node that keeps track of settings and can load and save them. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static Settings Settings => Singleton?.GetNodeOrNull<Settings>("Settings");
+    public static Settings Settings => Singleton.GetNodeOrNull<Settings>("Settings");
 
     /// <summary>
     /// Node that maintains the FMOD Studio System. Main access point for the FMOD integration. <br/>Can be <c>null</c> if autoload hasn't initialized yet.
     /// </summary>
-    public static FMODHandler FMOD => Singleton?.GetNodeOrNull<FMODHandler>("FMOD");
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    static extern bool SetDllDirectory(string lpPathName);
+    public static FMODHandler FMOD => Singleton.GetNodeOrNull<FMODHandler>("FMOD");
 
     public Defluo()
     {
-        // Set the default directory for importing DLLs
-        SetDllDirectory(ProjectSettings.GlobalizePath("res://addons/DefluoLib/bin"));
+        DefluoLib.SetDllLoadDirectory();
     }
 
     public override void _EnterTree()
@@ -73,7 +67,7 @@ public partial class Defluo : Node
     /// <param name="key">String corresponding to the translation key</param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static string Tr(string key, string context = null) =>
+    public static string Tr(string key, string context = "") =>
         TranslationServer.Translate(key, context);
 
     /// <summary>
@@ -84,6 +78,6 @@ public partial class Defluo : Node
     /// <param name="number">Quantity of the plural object, used to fetch the correct form</param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static string Tr(string key, string pluralKey, int number, string context = null) =>
+    public static string Tr(string key, string pluralKey, int number, string context = "") =>
         TranslationServer.TranslatePlural(key, pluralKey, number, context);
 }

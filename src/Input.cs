@@ -1,11 +1,11 @@
+namespace DefluoLib;
+
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
-namespace DefluoLib;
 
 /// <summary>
 /// Used to interface with mouse movement
@@ -15,7 +15,7 @@ public class Mouse
     /// <summary>
     /// Threshold for when mouse is detected to be moved.
     /// </summary>
-    public const float DefaultVelocityThreshold = 10;
+    public const float DEFAULT_VELOCITY_THRESHOLD = 10;
 
     /// <summary>
     /// Current position of mouse pointer in viewport
@@ -72,7 +72,7 @@ public class Mouse
 /// </summary>
 public partial class Input : Node
 {
-    public const string UserKeybindsResourcePath = "user://keybinds.tres";
+    public const string USER_KEYBINDS_RESOURCE_PATH = "user://keybinds.tres";
 
     /// <summary>
     /// If <c>true</c>, all input events will be logged to the console
@@ -93,13 +93,11 @@ public partial class Input : Node
     /// </summary>
     public bool IsMouseCaptured
     {
-        get { return Godot.Input.MouseMode == Godot.Input.MouseModeEnum.Captured; }
-        set
-        {
+        get => Godot.Input.MouseMode == Godot.Input.MouseModeEnum.Captured;
+        set =>
             Godot.Input.MouseMode = value
                 ? Godot.Input.MouseModeEnum.Captured
                 : Godot.Input.MouseModeEnum.Visible;
-        }
     }
 
     private bool disabled;
@@ -112,7 +110,7 @@ public partial class Input : Node
     /// </summary>
     public bool Disabled
     {
-        get { return disabled; }
+        get => disabled;
         set
         {
             // When disabling input, reset press states
@@ -138,13 +136,13 @@ public partial class Input : Node
     /// registered as a keybind and probably should not be used for anything else.
     /// </summary>
     /// <value></value>
-    public bool RebindingButton { get; internal set; } = false;
+    public bool RebindingButton { get; internal set; }
 
     /// <summary>
     /// If true, controller input was last used.
     /// If false, keyboard and mouse input was last used.
     /// </summary>
-    public bool UsingControllerInput = false;
+    public bool UsingControllerInput;
 
     /// <summary>
     /// Event that is invoked when input type changes between controller and keyboard.
@@ -238,7 +236,7 @@ public partial class Input : Node
     /// Stores the previously stored pressed states of joy axis inputs.
     /// This is required to properly send pressed and released signals.
     /// </summary>
-    public Dictionary<string, bool> JoyAxisLatestPressedStates = new();
+    public Dictionary<string, bool> JoyAxisLatestPressedStates = [];
 
     private List<PropertyInfo> properties;
     private List<Keybind> keybinds;
@@ -253,7 +251,7 @@ public partial class Input : Node
 
         // Loop through keybinds and their properties to set categories for them
         // based on declared attributes
-        CreateCategoryAttribute latestCategoryAttribute = null;
+        CreateCategoryAttribute? latestCategoryAttribute = null;
         foreach (var (keybind, index) in keybinds.WithIndex())
         {
             var attribute = properties[index].GetCustomAttribute(typeof(CreateCategoryAttribute));
@@ -267,9 +265,9 @@ public partial class Input : Node
         // using settings with default values before they get overwritten by initialization
         defaultKeybindResource = CreateResourceFromValues();
 
-        if (ResourceLoader.Exists(UserKeybindsResourcePath))
+        if (ResourceLoader.Exists(USER_KEYBINDS_RESOURCE_PATH))
         {
-            keybindResource = ResourceLoader.Load<DictionaryResource>(UserKeybindsResourcePath);
+            keybindResource = ResourceLoader.Load<DictionaryResource>(USER_KEYBINDS_RESOURCE_PATH);
             LoadKeybinds(keybindResource);
         }
         else
@@ -294,7 +292,7 @@ public partial class Input : Node
                 // Don't change input type if mouse movement velocity is below default threshold
                 if (
                     @event is InputEventMouseMotion mouseEvent
-                    && mouseEvent.Velocity.Length() < Mouse.DefaultVelocityThreshold
+                    && mouseEvent.Velocity.Length() < Mouse.DEFAULT_VELOCITY_THRESHOLD
                 )
                 {
                     break;
@@ -310,7 +308,7 @@ public partial class Input : Node
                 // Don't change input type if axis input value is below default threshold
                 if (
                     @event is InputEventJoypadMotion joypadEvent
-                    && Mathf.Abs(joypadEvent.AxisValue) < Keybind.DefaultAxisThreshold
+                    && Mathf.Abs(joypadEvent.AxisValue) < Keybind.DEFAULT_AXIS_THRESHOLD
                 )
                 {
                     break;
@@ -359,12 +357,14 @@ public partial class Input : Node
             // ParseValue should always return a boolean since the event applies to input
             if (DigitalInputPressed != null && input != null)
             {
+#pragma warning disable CS8629
                 var value = input.ParseValue(@event).Value;
+#pragma warning restore CS8629
                 // If event is an analog event, invoke event only if pressed state has changed
+
                 if (@event is InputEventJoypadMotion)
                 {
-                    if (!JoyAxisLatestPressedStates.ContainsKey(input.DisplayString))
-                        JoyAxisLatestPressedStates.Add(input.DisplayString, value);
+                    JoyAxisLatestPressedStates.TryAdd(input.DisplayString, value);
                     if (JoyAxisLatestPressedStates[input.DisplayString] != value)
                     {
                         GD.Print(value);
@@ -386,12 +386,12 @@ public partial class Input : Node
         {
             if (keybind.IsPressed)
             {
-                keybind.ProcessIsJustPressed = keybind.ProcessFramesHeldDown == 0;
+                keybind.processIsJustPressed = keybind.ProcessFramesHeldDown == 0;
                 keybind.ProcessFramesHeldDown++;
             }
             else
             {
-                keybind.ProcessIsJustReleased = keybind.ProcessFramesHeldDown != 0;
+                keybind.processIsJustReleased = keybind.ProcessFramesHeldDown != 0;
                 keybind.ProcessFramesHeldDown = 0;
             }
         }
@@ -405,12 +405,12 @@ public partial class Input : Node
         {
             if (keybind.IsPressed)
             {
-                keybind.PhysicsIsJustPressed = keybind.PhysicsFramesHeldDown == 0;
+                keybind.physicsIsJustPressed = keybind.PhysicsFramesHeldDown == 0;
                 keybind.PhysicsFramesHeldDown++;
             }
             else
             {
-                keybind.PhysicsIsJustReleased = keybind.PhysicsFramesHeldDown != 0;
+                keybind.physicsIsJustReleased = keybind.PhysicsFramesHeldDown != 0;
                 keybind.PhysicsFramesHeldDown = 0;
             }
         }
@@ -436,7 +436,7 @@ public partial class Input : Node
     /// <returns></returns>
     internal static List<PropertyInfo> GetKeybindProperties()
     {
-        IEnumerable<PropertyInfo> list =
+        var list =
             from property in typeof(Input).GetProperties()
             where typeof(Keybind).IsAssignableFrom(property.PropertyType)
             select property;
@@ -449,11 +449,12 @@ public partial class Input : Node
     /// </summary>
     public List<Keybind> GetKeybinds()
     {
-        List<Keybind> list = properties
+#pragma warning disable CS8600
+        var list = properties
             .Select(property => (Keybind)property.GetValue(this))
             .ToList();
-
-        return list.ToList();
+#pragma warning restore CS8600
+        return [.. list];
     }
 
     /// <summary>
@@ -496,7 +497,7 @@ public partial class Input : Node
     public bool GetDigitalValue(
         DigitalInput input,
         int device = 0,
-        float axisThreshold = Keybind.DefaultAxisThreshold
+        float axisThreshold = Keybind.DEFAULT_AXIS_THRESHOLD
     )
     {
         if (Disabled)
@@ -600,10 +601,9 @@ public partial class Input : Node
         // if definition name is found in resource dictionary
         foreach (var keybind in GetKeybinds())
         {
-            if (resourceToLoad.Dictionary.ContainsKey(keybind.DisplayName))
+            if (resourceToLoad.Dictionary.TryGetValue(keybind.DisplayName, out var value))
             {
-                keybind.BindedInputs = resourceToLoad.Dictionary[keybind.DisplayName]
-                    .As<Godot.Collections.Array>()
+                keybind.BindedInputs = value.As<Godot.Collections.Array>()
                     .Select(dict => new DigitalInput((Godot.Collections.Dictionary)dict))
                     .ToList();
             }
@@ -617,7 +617,7 @@ public partial class Input : Node
     public void SaveKeybinds()
     {
         keybindResource = CreateResourceFromValues();
-        ResourceSaver.Save(keybindResource, UserKeybindsResourcePath);
+        ResourceSaver.Save(keybindResource, USER_KEYBINDS_RESOURCE_PATH);
         Defluo.Print("Saved keybinds to disk");
     }
 

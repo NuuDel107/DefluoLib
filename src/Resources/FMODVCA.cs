@@ -1,8 +1,8 @@
+namespace DefluoLib;
+
 using Godot;
 using FMOD.Studio;
 using System;
-
-namespace DefluoLib;
 
 /// <summary>
 /// A <see href="https://www.fmod.com/docs/2.03/studio/mixing.html#vcas">VCA</see> resource.
@@ -12,7 +12,7 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODVCA : FMODResource
 {
-    private VCA _VCA;
+    private VCA vca;
 
     /// <summary>
     /// The raw API <see href="https://www.fmod.com/docs/2.03/api/studio-api-vca.html">VCA</see> object.
@@ -21,12 +21,12 @@ public partial class FMODVCA : FMODResource
     {
         get
         {
-            if (_VCA.handle == IntPtr.Zero)
+            if (vca.handle == IntPtr.Zero)
             {
-                if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getVCA(Path, out _VCA)))
-                    throw new System.ArgumentException($"Invalid VCA path {Path}");
+                if (!FMODCaller.CheckResult(Defluo.FMOD.StudioSystem.getVCA(Path, out vca)))
+                    throw new ArgumentException($"Invalid VCA path {Path}");
             }
-            return _VCA;
+            return vca;
         }
     }
 

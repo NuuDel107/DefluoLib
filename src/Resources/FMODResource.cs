@@ -1,6 +1,6 @@
-using Godot;
-
 namespace DefluoLib;
+
+using Godot;
 
 [Tool]
 [GlobalClass]

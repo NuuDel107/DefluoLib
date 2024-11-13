@@ -1,9 +1,8 @@
+namespace DefluoLib;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
-
-namespace DefluoLib;
 
 /// <summary>
 /// A pre-defined input action that can be subscribed to with callback functions.
@@ -14,7 +13,7 @@ public class Keybind
     /// <summary>
     /// Default value for axis threshold
     /// </summary>
-    public const float DefaultAxisThreshold = 0.9f;
+    public const float DEFAULT_AXIS_THRESHOLD = 0.9f;
 
     /// <summary>
     /// Name of keybind, displayed in the settings menu
@@ -30,38 +29,32 @@ public class Keybind
     /// <summary>
     /// If keybind is currently pressed down
     /// </summary>
-    public bool IsPressed { get; internal set; } = false;
+    public bool IsPressed { get; internal set; }
 
     /// <summary>
     /// Amount of process frames that keybind has been held down
     /// </summary>
-    public int ProcessFramesHeldDown { get; internal set; } = 0;
+    public int ProcessFramesHeldDown { get; internal set; }
 
     /// <summary>
     /// Amount of physics frames that keybind has been held down
     /// </summary>
-    public int PhysicsFramesHeldDown { get; internal set; } = 0;
+    public int PhysicsFramesHeldDown { get; internal set; }
 
-    internal bool ProcessIsJustPressed;
-    internal bool ProcessIsJustReleased;
-    internal bool PhysicsIsJustPressed;
-    internal bool PhysicsIsJustReleased;
+    internal bool processIsJustPressed;
+    internal bool processIsJustReleased;
+    internal bool physicsIsJustPressed;
+    internal bool physicsIsJustReleased;
 
     /// <summary>
     /// If keybind has been pressed down this frame
     /// </summary>
-    public bool IsJustPressed
-    {
-        get => Engine.IsInPhysicsFrame() ? PhysicsIsJustPressed : ProcessIsJustPressed;
-    }
+    public bool IsJustPressed => Engine.IsInPhysicsFrame() ? physicsIsJustPressed : processIsJustPressed;
 
     /// <summary>
     /// If keybind has been released this frame
     /// </summary>
-    public bool IsJustReleased
-    {
-        get => Engine.IsInPhysicsFrame() ? PhysicsIsJustReleased : ProcessIsJustReleased;
-    }
+    public bool IsJustReleased => Engine.IsInPhysicsFrame() ? physicsIsJustReleased : processIsJustReleased;
 
     /// <summary>
     /// List of inputs binded to this action,
@@ -102,7 +95,7 @@ public class Keybind
     {
         DisplayName = displayName;
         Options = options;
-        BindedInputs = inputs.ToList();
+        BindedInputs = [.. inputs];
     }
 
     public Keybind(string displayName, params DigitalInput[] inputs)
@@ -142,7 +135,7 @@ public class KeybindOptions
     public KeybindOptions(
         bool isEssential = false,
         bool canBeRebinded = true,
-        float axisThreshold = Keybind.DefaultAxisThreshold
+        float axisThreshold = Keybind.DEFAULT_AXIS_THRESHOLD
     )
     {
         AxisThreshold = axisThreshold;

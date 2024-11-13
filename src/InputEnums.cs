@@ -1,8 +1,8 @@
+namespace DefluoLib;
+
 using System;
 using Godot;
 using Godot.Collections;
-
-namespace DefluoLib;
 
 /// <summary>
 /// Enum representing the possible source types for a digital input
@@ -32,10 +32,10 @@ public enum DigitalInputType
 
 public class DigitalInput
 {
-    private readonly Key Key;
-    private readonly MouseButton MouseButton;
-    private readonly JoyButton JoyButton;
-    private readonly JoyAxis JoyAxis;
+    private readonly Key key;
+    private readonly MouseButton mouseButton;
+    private readonly JoyButton joyButton;
+    private readonly JoyAxis joyAxis;
 
     /// <summary>
     /// Type of digital input
@@ -54,7 +54,7 @@ public class DigitalInput
     {
         get
         {
-            string buttonName = Type switch
+            var buttonName = Type switch
             {
                 DigitalInputType.Key => ((Key)EnumValue).ToString(),
                 DigitalInputType.MouseButton => ((MouseButton)EnumValue).ToString(),
@@ -62,61 +62,58 @@ public class DigitalInput
                 DigitalInputType.JoyAxis => ((JoyAxis)EnumValue).ToString(),
                 _ => throw new NotImplementedException()
             };
-            string buttonType = Type switch
+            var buttonType = Type switch
             {
                 DigitalInputType.Key => "KEY",
                 DigitalInputType.MouseButton => "MOUSE",
                 DigitalInputType.JoyButton or DigitalInputType.JoyAxis => "JOYDIGITAL",
                 _ => throw new NotImplementedException()
             };
-            string buttonAnalogType = "";
+            var buttonAnalogType = "";
             if (Type == DigitalInputType.JoyAxis)
             {
                 buttonAnalogType = PositiveAnalog ? "_POSITIVE" : "_NEGATIVE";
             }
-            return Defluo.Tr($"INPUT_{buttonType}_{buttonName.ToUpper()}{buttonAnalogType}");
+            return Defluo.Tr(
+                $"INPUT_{buttonType}_{buttonName.ToUpperInvariant()}{buttonAnalogType}"
+            );
         }
     }
 
     /// <summary>
     /// Raw value from the Godot input enum that this input represents
     /// </summary>
-    public long EnumValue
-    {
-        get
+    public long EnumValue =>
+        Type switch
         {
-            return Type switch
-            {
-                DigitalInputType.Key => (long)Key,
-                DigitalInputType.MouseButton => (long)MouseButton,
-                DigitalInputType.JoyButton => (long)JoyButton,
-                DigitalInputType.JoyAxis => (long)JoyAxis,
-                _ => throw new NotImplementedException()
-            };
-        }
-    }
+            DigitalInputType.Key => (long)key,
+            DigitalInputType.MouseButton => (long)mouseButton,
+            DigitalInputType.JoyButton => (long)joyButton,
+            DigitalInputType.JoyAxis => (long)joyAxis,
+            _ => throw new NotImplementedException()
+        };
 
     public DigitalInput(Key key)
     {
-        Key = key;
+        this.key = key;
         Type = DigitalInputType.Key;
     }
 
     public DigitalInput(MouseButton mouseButton)
     {
-        MouseButton = mouseButton;
+        this.mouseButton = mouseButton;
         Type = DigitalInputType.MouseButton;
     }
 
     public DigitalInput(JoyButton joyButton)
     {
-        JoyButton = joyButton;
+        this.joyButton = joyButton;
         Type = DigitalInputType.JoyButton;
     }
 
     public DigitalInput(JoyAxis joyAxis, bool positive)
     {
-        JoyAxis = joyAxis;
+        this.joyAxis = joyAxis;
         PositiveAnalog = positive;
         Type = DigitalInputType.JoyAxis;
     }
@@ -136,16 +133,16 @@ public class DigitalInput
             switch (Type)
             {
                 case DigitalInputType.Key:
-                    Key = (Key)(long)parameters[1];
+                    key = (Key)(long)parameters[1];
                     break;
                 case DigitalInputType.MouseButton:
-                    MouseButton = (MouseButton)(long)parameters[1];
+                    mouseButton = (MouseButton)(long)parameters[1];
                     break;
                 case DigitalInputType.JoyButton:
-                    JoyButton = (JoyButton)(long)parameters[1];
+                    joyButton = (JoyButton)(long)parameters[1];
                     break;
                 case DigitalInputType.JoyAxis:
-                    JoyAxis = (JoyAxis)(long)parameters[1];
+                    joyAxis = (JoyAxis)(long)parameters[1];
                     break;
             }
         }
@@ -153,15 +150,13 @@ public class DigitalInput
             throw new ArgumentException("Dictionary not valid for initialization");
     }
 
-    public static explicit operator Dictionary(DigitalInput input)
-    {
-        return new()
+    public static explicit operator Dictionary(DigitalInput input) =>
+        new()
         {
             { "type", input.Type.ToString() },
             { "enum", input.EnumValue },
             { "positiveAnalog", input.PositiveAnalog }
         };
-    }
 
     public static explicit operator Variant(DigitalInput input) => (Dictionary)input;
 
@@ -187,13 +182,13 @@ public class DigitalInput
             switch (Type)
             {
                 case DigitalInputType.Key:
-                    return Equals(input.Key);
+                    return Equals(input.key);
                 case DigitalInputType.MouseButton:
-                    return Equals(input.MouseButton);
+                    return Equals(input.mouseButton);
                 case DigitalInputType.JoyButton:
-                    return Equals(input.JoyButton);
+                    return Equals(input.joyButton);
                 case DigitalInputType.JoyAxis:
-                    return Equals(input.JoyAxis, input.PositiveAnalog);
+                    return Equals(input.joyAxis, input.PositiveAnalog);
             }
         return false;
     }
@@ -202,11 +197,11 @@ public class DigitalInput
     /// Parses the pressed state from event, if event applies to digital input
     /// </summary>
     /// <returns>Pressed state of digital input in event, or null if event doesn't apply</returns>
-    public bool? ParseValue(InputEvent @event, float axisThreshold = Keybind.DefaultAxisThreshold)
+    public bool? ParseValue(InputEvent @event, float axisThreshold = Keybind.DEFAULT_AXIS_THRESHOLD)
     {
+        // If physical keycode is empty, check for equality using the regular keycode instead
         if (
             @event is InputEventKey keyEvent
-            // If physical keycode is empty, check for equality using the regular keycode instead
             && Equals(
                 keyEvent.PhysicalKeycode == Key.None ? keyEvent.Keycode : keyEvent.PhysicalKeycode
             )
@@ -239,7 +234,7 @@ public class DigitalInput
     /// Returns <c>null</c> if class couldn't be parsed from the event
     /// </summary>
     /// <param name="event">Event to parse DigitalInput from</param>
-    public static DigitalInput FromEvent(InputEvent @event)
+    public static DigitalInput? FromEvent(InputEvent @event)
     {
         if (@event is InputEventKey keyEvent)
         {

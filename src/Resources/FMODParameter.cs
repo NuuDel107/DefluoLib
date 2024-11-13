@@ -1,7 +1,8 @@
-using Godot;
-using FMOD.Studio;
-
 namespace DefluoLib;
+
+using Godot;
+using System;
+using FMOD.Studio;
 
 /// <summary>
 /// A <see href="https://www.fmod.com/docs/2.03/studio/parameters.html">parameter</see> resource.
@@ -11,7 +12,7 @@ namespace DefluoLib;
 [GlobalClass]
 public partial class FMODParameter : FMODResource
 {
-    private PARAMETER_DESCRIPTION paramDescription = new();
+    private PARAMETER_DESCRIPTION paramDescription;
     public PARAMETER_DESCRIPTION ParameterDescription
     {
         get
@@ -26,7 +27,7 @@ public partial class FMODParameter : FMODResource
                         )
                     )
                 )
-                    throw new System.ArgumentException($"Invalid parameter path {Path}");
+                    throw new ArgumentException($"Invalid parameter path {Path}");
             }
             return paramDescription;
         }
@@ -38,7 +39,7 @@ public partial class FMODParameter : FMODResource
     public FMODParameter()
         : base() { }
 
-    private string[] labels = new string[0];
+    private string[] labels = [];
 
     /// <summary>
     /// Possible string values that can be used to set the parameter's value.
@@ -54,7 +55,7 @@ public partial class FMODParameter : FMODResource
             if (labels.Length == 0)
             {
                 labels = new string[(int)MaximumValue];
-                for (int i = 0; i < MaximumValue; i++)
+                for (var i = 0; i < MaximumValue; i++)
                 {
                     FMODCaller.CheckResult(
                         Defluo.FMOD.StudioSystem.getParameterLabelByName(Path, i, out var label)
@@ -143,7 +144,7 @@ public partial class FMODParameter : FMODResource
     public string GetGlobalValueAsLabel()
     {
         if (!IsLabeled)
-            throw new System.Exception("Parameter is not labeled");
+            throw new InvalidOperationException("Parameter is not labeled");
 
         return Labels[(int)GetGlobalValue()];
     }

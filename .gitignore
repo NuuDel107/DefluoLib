@@ -1,5 +1,7 @@
 # FMOD binary and binding files can't be included in the repository
 # (because fmod incorporated would assassinate me)
-bin/
-lib/
+bin/*
+lib/*
 
+# Prevent linter errors for bindings
+!lib/.editorconfig

@@ -1,9 +1,9 @@
+namespace DefluoLib;
+
 using Godot;
 using Godot.Collections;
 using FMOD.Studio;
 using FMOD;
-
-namespace DefluoLib;
 
 [Tool]
 public partial class MainScreen : Control
@@ -32,7 +32,7 @@ public partial class MainScreen : Control
     [Export]
     public Texture2D StopIcon;
 
-    private string SelectedPath = "";
+    private string selectedPath = "";
     private EventInstance? playingEventInstance;
 
     public override void _Ready()
@@ -55,13 +55,13 @@ public partial class MainScreen : Control
         FMODTree.Clear();
         var root = FMODTree.CreateItem();
 
-        foreach (var bank in DefluoLib.Singleton.FMODLister.Banks)
+        foreach (var bank in DefluoLib.FMODLister.Banks)
         {
             var bankItem = FMODTree.CreateItem(root);
             FMODCaller.CheckResult(bank.getPath(out var bankPath));
             bankItem.SetText(0, bankPath.Split("/")[^1]);
             bankItem.SetTooltipText(0, bankPath);
-            bankItem.SetIcon(0, FMODIcons.BankIcon);
+            bankItem.SetIcon(0, DefluoLib.FMODIcons.BankIcon);
             bankItem.Collapsed = true;
 
             ListEvents(bank, bankItem);
@@ -81,7 +81,7 @@ public partial class MainScreen : Control
         eventParent.Collapsed = true;
         eventParent.SetSelectable(0, false);
 
-        TreeItem snapshotParent = null;
+        TreeItem? snapshotParent = null;
 
         var eventFolders = new Dictionary<string, TreeItem>();
         var snapshotFolders = new Dictionary<string, TreeItem>();
@@ -102,18 +102,23 @@ public partial class MainScreen : Control
             var pathSteps = eventPath.Split('/');
             var folderItem = isSnapshot ? snapshotParent : eventParent;
             var folderPath = "";
-            for (int i = 1; i < pathSteps.Length; i++)
+            for (var i = 1; i < pathSteps.Length; i++)
             {
                 if (i == pathSteps.Length - 1)
                 {
                     var eventItem = FMODTree.CreateItem(folderItem);
                     eventItem.SetText(0, pathSteps[i]);
                     eventItem.SetTooltipText(0, eventPath);
-                    eventItem.SetIcon(0, isSnapshot ? FMODIcons.SnapshotIcon : FMODIcons.EventIcon);
+                    eventItem.SetIcon(
+                        0,
+                        isSnapshot
+                            ? DefluoLib.FMODIcons.SnapshotIcon
+                            : DefluoLib.FMODIcons.EventIcon
+                    );
                     eventItem.Collapsed = true;
 
                     eventDesc.getParameterDescriptionCount(out var paramAmount);
-                    for (int paramId = 0; paramId < paramAmount; paramId++)
+                    for (var paramId = 0; paramId < paramAmount; paramId++)
                     {
                         FMODCaller.CheckResult(
                             eventDesc.getParameterDescriptionByIndex(paramId, out var param)
@@ -122,11 +127,11 @@ public partial class MainScreen : Control
                         var paramItem = FMODTree.CreateItem(eventItem);
                         paramItem.SetText(0, param.name);
                         if (param.flags.HasFlag(PARAMETER_FLAGS.LABELED))
-                            paramItem.SetIcon(0, FMODIcons.LabeledParameterIcon);
+                            paramItem.SetIcon(0, DefluoLib.FMODIcons.LabeledParameterIcon);
                         else if (param.flags.HasFlag(PARAMETER_FLAGS.DISCRETE))
-                            paramItem.SetIcon(0, FMODIcons.DiscreteParameterIcon);
+                            paramItem.SetIcon(0, DefluoLib.FMODIcons.DiscreteParameterIcon);
                         else
-                            paramItem.SetIcon(0, FMODIcons.ContinuousParameterIcon);
+                            paramItem.SetIcon(0, DefluoLib.FMODIcons.ContinuousParameterIcon);
                     }
                 }
                 else
@@ -134,14 +139,12 @@ public partial class MainScreen : Control
                     folderPath += pathSteps[i] + "/";
                     if (isSnapshot)
                     {
-                        if (snapshotFolders.ContainsKey(folderPath))
-                            folderItem = snapshotFolders[folderPath];
-                        else
+                        if (!snapshotFolders.TryGetValue(folderPath, out folderItem))
                         {
                             folderItem = FMODTree.CreateItem(folderItem, snapshotFolders.Count);
                             folderItem.SetText(0, pathSteps[i]);
                             folderItem.SetTooltipText(0, folderPath);
-                            folderItem.SetIcon(0, FMODIcons.FolderClosedIcon);
+                            folderItem.SetIcon(0, DefluoLib.FMODIcons.FolderClosedIcon);
                             folderItem.Collapsed = true;
                             folderItem.SetSelectable(0, false);
                             snapshotFolders.Add(folderPath, folderItem);
@@ -149,14 +152,12 @@ public partial class MainScreen : Control
                     }
                     else
                     {
-                        if (eventFolders.ContainsKey(folderPath))
-                            folderItem = eventFolders[folderPath];
-                        else
+                        if (!eventFolders.TryGetValue(folderPath, out folderItem))
                         {
                             folderItem = FMODTree.CreateItem(folderItem, eventFolders.Count);
                             folderItem.SetText(0, pathSteps[i]);
                             folderItem.SetTooltipText(0, folderPath);
-                            folderItem.SetIcon(0, FMODIcons.FolderClosedIcon);
+                            folderItem.SetIcon(0, DefluoLib.FMODIcons.FolderClosedIcon);
                             folderItem.Collapsed = true;
                             folderItem.SetSelectable(0, false);
                             eventFolders.Add(folderPath, folderItem);
@@ -183,7 +184,7 @@ public partial class MainScreen : Control
         var masterBus = FMODTree.CreateItem(busParent);
         masterBus.SetText(0, "Master");
         masterBus.SetTooltipText(0, "bus:/");
-        masterBus.SetIcon(0, FMODIcons.MasterBusIcon);
+        masterBus.SetIcon(0, DefluoLib.FMODIcons.MasterBusIcon);
         masterBus.Collapsed = true;
         busItems.Add("bus:/", masterBus);
 
@@ -196,14 +197,14 @@ public partial class MainScreen : Control
             var pathSteps = busPath.Split('/');
             var parentBus = masterBus;
             var parentPath = "bus:/";
-            for (int i = 1; i < pathSteps.Length; i++)
+            for (var i = 1; i < pathSteps.Length; i++)
             {
                 if (i == pathSteps.Length - 1)
                 {
                     var busItem = FMODTree.CreateItem(parentBus);
                     busItem.SetText(0, pathSteps[i]);
                     busItem.SetTooltipText(0, busPath);
-                    busItem.SetIcon(0, FMODIcons.ReturnBusIcon);
+                    busItem.SetIcon(0, DefluoLib.FMODIcons.ReturnBusIcon);
                     busItem.Collapsed = true;
                 }
                 else
@@ -216,7 +217,7 @@ public partial class MainScreen : Control
                     parentBus = FMODTree.CreateItem(parentBus);
                     parentBus.SetText(0, pathSteps[i]);
                     parentBus.SetTooltipText(0, parentPath);
-                    parentBus.SetIcon(0, FMODIcons.GroupBusIcon);
+                    parentBus.SetIcon(0, DefluoLib.FMODIcons.GroupBusIcon);
                     parentBus.Collapsed = true;
                     busItems.Add(busPath, parentBus);
 
@@ -228,8 +229,8 @@ public partial class MainScreen : Control
 
     private void ListVCAs(Bank bank, TreeItem parent)
     {
-        FMODCaller.CheckResult(bank.getVCAList(out var VCAlist));
-        if (VCAlist.Length == 0)
+        FMODCaller.CheckResult(bank.getVCAList(out var vcaList));
+        if (vcaList.Length == 0)
             return;
 
         var vcaParent = FMODTree.CreateItem(parent);
@@ -239,24 +240,24 @@ public partial class MainScreen : Control
 
         var vcas = new Dictionary<string, TreeItem>();
 
-        foreach (var VCA in VCAlist)
+        foreach (var vca in vcaList)
         {
-            FMODCaller.CheckResult(VCA.getPath(out var VCAPath));
-            if (vcas.ContainsKey(VCAPath))
+            FMODCaller.CheckResult(vca.getPath(out var vcaPath));
+            if (vcas.ContainsKey(vcaPath))
                 continue;
 
-            var pathSteps = VCAPath.Split('/');
+            var pathSteps = vcaPath.Split('/');
             var parentVCA = vcaParent;
             var parentPath = "vca:/";
-            for (int i = 1; i < pathSteps.Length; i++)
+            for (var i = 1; i < pathSteps.Length; i++)
             {
                 if (i == pathSteps.Length - 1)
                 {
-                    var VCAItem = FMODTree.CreateItem(parentVCA);
-                    VCAItem.SetText(0, pathSteps[i]);
-                    VCAItem.SetTooltipText(0, VCAPath);
-                    VCAItem.SetIcon(0, FMODIcons.VCAIcon);
-                    VCAItem.Collapsed = true;
+                    var vcaItem = FMODTree.CreateItem(parentVCA);
+                    vcaItem.SetText(0, pathSteps[i]);
+                    vcaItem.SetTooltipText(0, vcaPath);
+                    vcaItem.SetIcon(0, DefluoLib.FMODIcons.VCAIcon);
+                    vcaItem.Collapsed = true;
                 }
                 else
                 {
@@ -268,9 +269,9 @@ public partial class MainScreen : Control
                     parentVCA = FMODTree.CreateItem(parentVCA);
                     parentVCA.SetText(0, pathSteps[i]);
                     parentVCA.SetTooltipText(0, parentPath);
-                    parentVCA.SetIcon(0, FMODIcons.VCAIcon);
+                    parentVCA.SetIcon(0, DefluoLib.FMODIcons.VCAIcon);
                     parentVCA.Collapsed = true;
-                    vcas.Add(VCAPath, parentVCA);
+                    vcas.Add(vcaPath, parentVCA);
 
                     parentPath += "/";
                 }
@@ -281,8 +282,8 @@ public partial class MainScreen : Control
     private void TreeItemSelected()
     {
         var item = FMODTree.GetSelected();
-        SelectedPath = item.GetTooltipText(0);
-        var itemType = SelectedPath.Split("/")[0];
+        selectedPath = item.GetTooltipText(0);
+        var itemType = selectedPath.Split("/")[0];
 
         ClearPlayingEventInstance();
         EventPlaybackContainer.Visible = itemType == "event:";
@@ -298,9 +299,9 @@ public partial class MainScreen : Control
         if (tooltip.EndsWith('/') && tooltip != "bus:/")
         {
             if (item.Collapsed)
-                item.SetIcon(0, FMODIcons.FolderClosedIcon);
+                item.SetIcon(0, DefluoLib.FMODIcons.FolderClosedIcon);
             else
-                item.SetIcon(0, FMODIcons.FolderOpenedIcon);
+                item.SetIcon(0, DefluoLib.FMODIcons.FolderOpenedIcon);
         }
     }
 
@@ -309,16 +310,13 @@ public partial class MainScreen : Control
         if (playingEventInstance == null)
         {
             FMODCaller.CheckResult(
-                DefluoLib.Singleton.FMODLister.StudioSystem.getEvent(
-                    SelectedPath,
-                    out var eventDesc
-                )
+                DefluoLib.FMODLister.StudioSystem.getEvent(selectedPath, out var eventDesc)
             );
             eventDesc.createInstance(out var instance);
             instance.start();
             instance.setCallback(EventStoppedCallback, EVENT_CALLBACK_TYPE.SOUND_STOPPED);
             playingEventInstance = instance;
-            DefluoLib.Singleton.FMODLister.StudioSystem.update();
+            DefluoLib.FMODLister.StudioSystem.update();
 
             EventPlayButton.Icon = StopIcon;
         }
@@ -332,7 +330,7 @@ public partial class MainScreen : Control
             else
             {
                 playingEventInstance.Value.stop(STOP_MODE.ALLOWFADEOUT);
-                DefluoLib.Singleton.FMODLister.StudioSystem.update();
+                DefluoLib.FMODLister.StudioSystem.update();
             }
         }
     }
@@ -345,7 +343,7 @@ public partial class MainScreen : Control
         playingEventInstance.Value.stop(STOP_MODE.IMMEDIATE);
         playingEventInstance.Value.release();
         playingEventInstance = null;
-        DefluoLib.Singleton.FMODLister.StudioSystem.update();
+        DefluoLib.FMODLister.StudioSystem.update();
 
         EventPlayButton.Icon = PlayIcon;
     }
@@ -362,7 +360,7 @@ public partial class MainScreen : Control
 
     private void Refresh()
     {
-        DefluoLib.Singleton.FMODLister.Refresh();
+        DefluoLib.FMODLister.Refresh();
         InitTree();
     }
 }
