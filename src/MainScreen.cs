@@ -101,6 +101,7 @@ public partial class MainScreen : Control
 
             var pathSteps = eventPath.Split('/');
             var folderItem = isSnapshot ? snapshotParent : eventParent;
+
             var folderPath = "";
             for (var i = 1; i < pathSteps.Length; i++)
             {
@@ -139,7 +140,10 @@ public partial class MainScreen : Control
                     folderPath += pathSteps[i] + "/";
                     if (isSnapshot)
                     {
-                        if (!snapshotFolders.TryGetValue(folderPath, out folderItem))
+                        if (snapshotFolders.TryGetValue(folderPath, out var folder))
+                        {
+                            folderItem = folder;
+                        }
                         {
                             folderItem = FMODTree.CreateItem(folderItem, snapshotFolders.Count);
                             folderItem.SetText(0, pathSteps[i]);
@@ -152,7 +156,11 @@ public partial class MainScreen : Control
                     }
                     else
                     {
-                        if (!eventFolders.TryGetValue(folderPath, out folderItem))
+                        if (eventFolders.TryGetValue(folderPath, out var folder))
+                        {
+                            folderItem = folder;
+                        }
+                        else
                         {
                             folderItem = FMODTree.CreateItem(folderItem, eventFolders.Count);
                             folderItem.SetText(0, pathSteps[i]);
