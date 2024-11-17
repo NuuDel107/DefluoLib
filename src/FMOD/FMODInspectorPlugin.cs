@@ -25,7 +25,8 @@ public partial class FMODInspectorPlugin : EditorInspectorPlugin
     {
         // If the property class name starts with FMOD,
         // it's (hopefully) an exported FMODResource
-        if (hintString.Length > 4 && hintString[..4] == "FMOD")
+        // Event playback resources are created with the default inspector
+        if (hintString.Length > 4 && hintString[..4] == "FMOD" && hintString != "FMODEventPlayback")
         {
             AddPropertyEditor(name, new FMODEditorProperty(hintString));
             return true;

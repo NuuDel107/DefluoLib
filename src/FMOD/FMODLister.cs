@@ -92,4 +92,20 @@ public class FMODLister
         List();
         Refreshed?.Invoke();
     }
+
+    public void PlayEvent(string eventPath, params (string name, Variant value)[] parameters)
+    {
+        FMODCaller.CheckResult(StudioSystem.getEvent(eventPath, out var eventDesc));
+        FMODCaller.CheckResult(eventDesc.createInstance(out var instance));
+        foreach (var (name, value) in parameters)
+        {
+            if (value.VariantType == Variant.Type.String)
+                instance.setParameterByNameWithLabel(name, value.As<string>(), true);
+            else
+                instance.setParameterByName(name, value.As<float>(), true);
+        }
+        instance.start();
+        instance.release();
+        StudioSystem.update();
+    }
 }

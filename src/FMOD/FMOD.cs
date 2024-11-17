@@ -138,11 +138,9 @@ public partial class FMODHandler : Node
 
     public override void _PhysicsProcess(double delta)
     {
-        if (Engine.IsEditorHint())
-            return;
-
         if (Listener == null)
             return;
+
         foreach (var (eventInstance, lastPosition) in attachedEventInstances)
         {
             if (eventInstance.IsReleased)
@@ -172,7 +170,7 @@ public partial class FMODHandler : Node
         UpdateStudioSystem();
     }
 
-    private ATTRIBUTES_3D Calculate3DAttributes(
+    private static ATTRIBUTES_3D Calculate3DAttributes(
         double delta,
         Vector3 pos,
         Vector3? lastPos,
